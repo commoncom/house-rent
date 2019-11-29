@@ -290,20 +290,6 @@
 		"constant": false,
 		"inputs": [
 			{
-				"name": "_addr",
-				"type": "address"
-			}
-		],
-		"name": "updateAuditor",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
 				"name": "_houseId",
 				"type": "bytes32"
 			},
@@ -331,6 +317,14 @@
 			},
 			{
 				"name": "_register",
+				"type": "address"
+			},
+			{
+				"name": "_remarkAddr",
+				"type": "address"
+			},
+			{
+				"name": "_authAddr",
 				"type": "address"
 			}
 		],
@@ -474,6 +468,11 @@
 			},
 			{
 				"indexed": false,
+				"name": "_houseId",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
 				"name": "_rating",
 				"type": "uint8"
 			},
@@ -595,6 +594,28 @@
 		"type": "event"
 	},
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "_userId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"name": "caller",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "_houseId",
+				"type": "bytes32"
+			}
+		],
+		"name": "AuthEvent",
+		"type": "event"
+	},
+	{
 		"constant": true,
 		"inputs": [
 			{
@@ -621,20 +642,6 @@
 			{
 				"name": "",
 				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "flag",
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool"
 			}
 		],
 		"payable": false,
