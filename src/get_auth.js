@@ -3,6 +3,7 @@ let  filePath = "./ethererscan/auth_abi.json";
 let web3 = require("./common/contract_com.js").web3;
 let Web3EthAbi = require('web3-eth-abi');
 let comCos = require("./common/globe.js");
+let token = require("./get_token.js");
 let contractAddress = comCos.authConAddr;
 let nonceMap = new Map();
 
@@ -13,6 +14,7 @@ async function initAuth() {
 
 function getIsAuth(contract, addr) {
 	return new Promise(resolve => {
+		// console.log("==get auth==", contract.methods)
   	    contract.methods.getIsAuth(addr).call().then(res => {
 			if (res) {
 				console.log("this house authenticate success");
@@ -21,7 +23,8 @@ function getIsAuth(contract, addr) {
 				resolve(false);
 			}
 		}).catch(err => {
-				console.log(err)
+				console.log("-getIsAuth: whether already auth----",err);
+				reject(err);
 		});
     });
 }
@@ -53,12 +56,15 @@ function authHouse(contract, addr, idCard, guid, owername, userId, prikey) {
                     	resolve({status:false, err:"认证房屋失败，请稍后重新认证!"});
                     }             
                 }).catch(err1 => {
-                  console.log("Create user error");
-                  reject({status:false, err:err1});
+                  console.log("Auth user error", err1);
+                  reject({status:false, err:"请检查余额是否足以支付手续费！"});
                 });
             } else {
               resolve({status:false, err:"这个房屋已经被认证过！"});
            };
+    	}).catch(err => {
+    		console.log("auth error", err)
+    		reject({status:false, err: err});
     	});
    });
 }
@@ -126,20 +132,28 @@ function packSendMsg(formAddr, privateKey, toAddr, createABI) {
 			      chainId: 3,
 			      nonce: '0x' + nonce
 				}
+				console.log("start sign the transaction")
 				web3.eth.accounts.signTransaction(txParams, privateKey).then(signedTx => {
+					console.log("start send the transaction")
 			 		web3.eth.sendSignedTransaction(signedTx.rawTransaction).then(receipt => {
 			 			if (receipt.status) {
 			 				console.log(receipt.transactionHash)
 			 				resolve(receipt);
 			 			} else {
-			 				console.log("this user already regiester");
-			 				reject("this user already regiester");
+			 				reject("发送交易失败!");
 			 			}
-			 		}).catch(err => {
-			 			reject(err);
+			 		}).catch(err1 => {
+			 			console.log("Send Fail:", err1);
+			 			reject(err1);
 			 		});
-				});
-			});
+				}).catch(err => {
+		 			console.log("Sign Fail:", err);
+		 			reject(err);
+		 		});;
+			}).catch(err => {
+	 			console.log("GetTransactionCount Fail:", err);
+	 			reject(err);
+	 		});
 		});	 	
 }
 

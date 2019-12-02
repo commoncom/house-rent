@@ -34,11 +34,13 @@ async function initToken() {
 
 function getBalance(contract, addr) {
   return new Promise((resolve, reject) => {
+    console.log("enter into get balance")
     contract.methods.balanceOf(addr).call().then(res => {
-      // console.log(res);
+      console.log("get the balance",res);
       resolve(res)
     }).catch(err => {
       console.log(err);
+      reject(err);
     });
   });
 }

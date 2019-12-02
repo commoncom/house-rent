@@ -1,6 +1,5 @@
 let getContract = require("./common/contract_com.js").GetContract;
 let filePath = "./ethererscan/house_abi.json";
-// let contractAddress = "0x027014b4a8fa8e49f0ba420a8e0f588c98b4f0da";
 let web3 = require("./common/contract_com.js").web3;
 let Web3EthAbi = require('web3-eth-abi');
 let comVar = require("./common/globe.js");
@@ -70,54 +69,72 @@ async function initHouseFun() {
 // });
 
 function checkLogin(addr) {
-	// Must login in first
-	let flag = false;
+	// 必须先登录
 	return new Promise((resolve) => {
-		RegisterFun.initHouseFunReg().then(con => {
+		RegisterFun.initReg().then(con => {
 			RegisterFun.isLogin(con, addr).then(res => {
-				flag = res;
-				if (flag) { // Already sign
-					flag = true;
-				}
-				resolve(flag);
+				resolve(res);
+			}).catch(err1 => {
+				console.log("checkLogin error", err1);
+				reject(err1)
 			});
+		}).catch(err => {
+			console.log("Register init fail", err);
+			reject(err);
 		});
 	});
 }
 
-function releaseHouse(contract, addr, privateKey, houseAddr, huxing, des, info, tenancy, rent, hopeCtx) {
+function releaseHouse(db, contract, contractToken, addr, privateKey, houseAddr, huxing, des, info, tenancy, rent, hopeCtx) {
 	return new Promise((resolve, reject) => {
-		checkLogin(addr).then(flag => {
-			if (!flag) {
-				console.log("Please login in first");
-				resolve(false);
-			} else {
-				const releaseFun = contract.methods.releaseHouse(houseAddr, huxing, des, info, tenancy, rent, hopeCtx);
-	    		const relABI = releaseFun.encodeABI();
-			    packSendMsg(addr, privateKey, contractAddress, relABI).then(receipt => {
-		        	if (receipt) {
-		        		console.log("Release house success!");
-		        		const eventJsonInterface = contract._jsonInterface.find(
-							o => (o.name === 'RelBasic' || o.name == 'RelInfo') && o.type === 'event');
-						if (JSON.stringify(receipt.logs) != '[]') {
-							const log = receipt.logs.find(
-								l => l.topics.includes(eventJsonInterface.signature)
-							)
-							let houseRel = Web3EthAbi.decodeLog(eventJsonInterface.inputs, log.data, log.topics.slice(1))
-			   				if (houseRel) {
-			   					resolve(houseRel);
-			   				} else {
-			   					resolve(receipt);
-			   				}
+		console.log("release===")
+		contractToken.then(con => {
+			TokenFun.getBalance(con, addr).then(bal => {
+				console.log("bal", bal, typeof(bal), bal.length)
+				let n = bal.length;
+				let newBal;
+				if (n > 6) {
+				   let temp = bal.splice(n-6, 6);
+				   let newBal = parseFloat(temp);
+				   if (newBal < comVar.promiseAmount) {
+				   		resolve({status: false, err: "RentToken数量不能满足保证金要求!余额为："+newBal})
+				   } else {
+				   	  console.log("---start release house---")
+					  checkLogin(addr).then(flag => {
+						if (!flag) {
+							console.log("Please login in first");
+							resolve({status: false, err: "该用户未登录，请先登录!"});
+						} else { // TokenFun
+							const releaseFun = contract.methods.releaseHouse(houseAddr, huxing, des, info, tenancy, rent, hopeCtx);
+				    		const relABI = releaseFun.encodeABI();
+						    packSendMsg(addr, privateKey, contractAddress, relABI).then(receipt => {
+					        	if (receipt) {
+					        		console.log("Release house success!");
+					        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'RelBasic');
+				                    if (flag) {
+				                    	console.log("release house receive: ", ctx)
+				                    	resolve({status:flag, data:{trans: ctx.transactionHash, houseId: decodeLog.houseHash}});
+				                    	
+				                    } else {
+				                    	resolve({status:false, err:"发布房源失败!"});
+				                    } 
+					        	}
+							}).catch(err => {
+								console.log("Release fail!", err);
+								reject({status:false, err:err});
+							});
 						}
-		        	} else {
-		        		console.log("Release house fail!");
-		        	}
-				}).catch(err => {
-					console.log("Release fail!");
-					reject(err);
-				});
-			}
+					}).catch(err1 => {
+			           console.log("Create user error", err1);
+			           reject({status:false, err:"网络繁忙，请稍后重试!"});
+			        });
+				   }
+				} else {
+					resolve({status: false, err: "RentToken余额不能满足发布房屋保证金的要求！"})
+				}
+			}).catch(err => {
+				reject({status: false, err: err});
+			})
 		});
 	});
 }
@@ -128,7 +145,7 @@ function requestSign(contract, addr, privateKey, houseId, realRent) {
 		checkLogin(addr).then(flag => {
 			if (!flag) {
 				console.log("Please login in first");
-				resolve(false);
+				resolve({status: false, err: "请先登录！"});
 			} else {
 				const reqFun = contract.methods.requestSign(houseId, realRent);
 			    const reqABI = reqFun.encodeABI();
@@ -136,25 +153,19 @@ function requestSign(contract, addr, privateKey, houseId, realRent) {
 			    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
 		        	if (receipt) {
 		        		console.log("Request the house success!");
-		        		const eventJsonInterface = contract._jsonInterface.find(
-							o => (o.name === 'RequestSign') && o.type === 'event');
-						if (JSON.stringify(receipt.logs) != '[]') {
-							const log = receipt.logs.find(
-								l => l.topics.includes(eventJsonInterface.signature)
-							)
-							let houseRel = Web3EthAbi.decodeLog(eventJsonInterface.inputs, log.data, log.topics.slice(1))
-			   				if (houseRel) {
-			   					resolve(houseRel);
-			   				} else {
-			   					resolve(receipt);
-			   				}
-						}
+		        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'RequestSign');
+	                    if (flag) {
+	                    	console.log("request house receive: ", ctx)
+	                    	resolve({status:flag, data: ctx.transactionHash});
+	                    } else {
+	                    	resolve({status:false, err:"请求签订房源失败!"});
+	                    } 
 		        	} else {
 		        		console.log("Release house fail!");
 		        	}
 				}).catch(err => {
 					console.log("Release fail!", err);
-					reject(err);
+					reject({status: false, err: err});
 				});
 			}
 		});
@@ -167,7 +178,7 @@ function signAgreement(contract, addr, privateKey, houseId, name, signHowLong, r
 		checkLogin(addr).then(flag => {
 			if (!flag) {
 				console.log("Please login in first");
-				resolve(false);
+				resolve({status: false, err: "请先登录！"});
 			} else {
 				const reqFun = contract.methods.signAgreement(houseId, name, signHowLong, rental, yearRent);
 			    const reqABI = reqFun.encodeABI();
@@ -175,25 +186,17 @@ function signAgreement(contract, addr, privateKey, houseId, name, signHowLong, r
 			    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
 		        	if (receipt) {
 		        		console.log("Sign success!");
-		        		const eventJsonInterface = contract._jsonInterface.find(
-							o => (o.name === 'SignContract') && o.type === 'event');
-						if (JSON.stringify(receipt.logs) != '[]') {
-							const log = receipt.logs.find(
-								l => l.topics.includes(eventJsonInterface.signature)
-							)
-							let houseRel = Web3EthAbi.decodeLog(eventJsonInterface.inputs, log.data, log.topics.slice(1))
-			   				if (houseRel) {
-			   					resolve(houseRel);
-			   				} else {
-			   					resolve(receipt);
-			   				}
-						}
-		        	} else {
-		        		console.log("Sign Agreement fail!");
-		        	}
+		        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'SignContract');
+	                    if (flag) {
+	                    	console.log("request house receive: ", ctx)
+	                    	resolve({status:flag, data: ctx.transactionHash});
+	                    } else {
+	                    	resolve({status:false, err:"签订合同失败!"});
+	                    }
+		        	} 
 				}).catch(err => {
 					console.log("Sign fail!", err);
-					reject(err);
+					reject({status: false, err: err});
 				});
 			}
 		});
@@ -207,25 +210,17 @@ function withdraw(contract, addr, privateKey, houseId, amount) {
 	    packSendMsg(addr, privateKey, contractAddress, withABI).then(receipt => {
         	if (receipt) {
         		console.log("Withdraw the coin success!");
-        		const eventJsonInterface = contract._jsonInterface.find(
-							o => (o.name === 'WithdrawDeposit') && o.type === 'event');
-				if (JSON.stringify(receipt.logs) != '[]') {
-					const log = receipt.logs.find(
-						l => l.topics.includes(eventJsonInterface.signature)
-					)
-					let houseRel = Web3EthAbi.decodeLog(eventJsonInterface.inputs, log.data, log.topics.slice(1))
-	   				if (houseRel) {
-	   					resolve(houseRel);
-	   				} else {
-	   					resolve(receipt);
-	   				}
-				}
-        	} else {
-        		console.log("Withdraw the coin fail!");
-        	}
+        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'WithdrawDeposit');
+                if (flag) {
+                	console.log("withdraw the promise receive: ", ctx)
+                	resolve({status:flag, data: ctx.transactionHash});
+                } else {
+                	resolve({status:false, err:"退款失败!"});
+                }
+        	} 
 		}).catch(err => {
 			console.log("Withdraw occure error!");
-			reject(err);
+			reject({stats: false, err: err});
 		});
 	});
 }
@@ -250,25 +245,17 @@ function breakContract(contract, addr, privateKey, houseId, reason) {
 		        			  	reject(false);
 		        			  }
 		        		});
-		        		const eventJsonInterface = contract._jsonInterface.find(
-							o => (o.name === 'BreakContract') && o.type === 'event');
-						if (JSON.stringify(receipt.logs) != '[]') {
-							const log = receipt.logs.find(
-								l => l.topics.includes(eventJsonInterface.signature)
-							)
-							let houseRel = Web3EthAbi.decodeLog(eventJsonInterface.inputs, log.data, log.topics.slice(1))
-			   				if (houseRel) {
-			   					resolve(houseRel);
-			   				} else {
-			   					resolve(receipt);
-			   				}
-						}
-		        	} else {
-		        		console.log("Break the contract fail!");
+		        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'BreakContract');
+		                if (flag) {
+		                	console.log("Break the contract receive: ", ctx)
+		                	resolve({status:flag, data: ctx.transactionHash});
+		                } else {
+		                	resolve({status:false, err:"毁约失败!"});
+		                }
 		        	}
 				}).catch(err => {
 					console.log("Break the contract occure error!, Please inspect whether already pass the admin check!");
-					reject(err.message);
+					reject({stats: false, err: "请检查是否已经通过管理员审核！"});
 				});
 			}
 		});
@@ -287,28 +274,22 @@ function checkBreak(contract, addr, privateKey, houseId, punishAmount, punishAdd
 			    console.log("Start Check Break the contract!", addr);
 			    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
 		        	if (receipt) {
-		        		console.log("Break Check Contract success!");
-		        		const eventJsonInterface = contract._jsonInterface.find(
-							o => (o.name === 'ApprovalBreak') && o.type === 'event');
-						if (JSON.stringify(receipt.logs) != '[]') {
-							const log = receipt.logs.find(
-								l => l.topics.includes(eventJsonInterface.signature)
-							)
-							let houseRel = Web3EthAbi.decodeLog(eventJsonInterface.inputs, log.data, log.topics.slice(1))
-			   				if (houseRel) {
-			   					resolve(houseRel);
-			   				} else {
-			   					resolve(receipt);
-			   				}
-						}
-		        	} else {
-		        		console.log("Check Break the contract fail!");
-		        	}
+		        		console.log("Check Break Contract success!");
+		        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'ApprovalBreak');
+		                if (flag) {
+		                	console.log("Check Break the contract receive: ", ctx)
+		                	resolve({status:flag, data: ctx.transactionHash});
+		                } else {
+		                	resolve({status:false, err:"审核交易审核失败!"});
+		                }
+		        	} 
 				}).catch(err => {
 					console.log("Check Break the contract occure error!", err);
-					reject(err);
+					reject({status: false, err: err});
 				});
 			}
+		}).catch(err => {
+			reject({status: false, err: err});
 		});
 	});
 }
@@ -358,15 +339,29 @@ function commentHouse(contract, addr, privateKey, houseId, ratingIndex, remark) 
 	});
 }
 
+function decodeLog(contract, receipt, eventName) {
+	const eventJsonInterface = contract._jsonInterface.find(
+      o => (o.name === eventName) && o.type === 'event');
+    if (JSON.stringify(receipt.logs) != '[]') {
+      const log = receipt.logs.find(
+        l => l.topics.includes(eventJsonInterface.signature)
+      );
+        console.log(decodeLog)
+        return [true, receipt, decodeLog];
+    } else {
+      return [false, "Cannt find logs", {}];
+    }
+}
+
 function packSendMsg(formAddr, privateKey, toAddr, createABI) {
 		let gas, nonce;
 		return new Promise((resolve, reject) => {
-			gas = 2000000000;
+			gas = 20000000000;
 			web3.eth.getTransactionCount(formAddr, 'pending').then(_nonce => {
-				if (nonceMap.has(formAddr) && (nonceMap[formAddr] == _nonce)) {
-		             _nonce += 1
-		        }
-		        nonceMap.set(formAddr, _nonce);
+				if (nonceMap.has(_nonce)) {
+					_nonce += 1
+				}
+				nonceMap.set(_nonce, true);
 				nonce = _nonce.toString(16);
 				const txParams = {
 				  gasPrice: gas,
@@ -377,20 +372,28 @@ function packSendMsg(formAddr, privateKey, toAddr, createABI) {
 			      chainId: 3,
 			      nonce: '0x' + nonce
 				}
+				console.log("start sign the transaction")
 				web3.eth.accounts.signTransaction(txParams, privateKey).then(signedTx => {
+					console.log("start send the transaction")
 			 		web3.eth.sendSignedTransaction(signedTx.rawTransaction).then(receipt => {
 			 			if (receipt.status) {
 			 				console.log(receipt.transactionHash)
 			 				resolve(receipt);
 			 			} else {
-			 				console.log("this user already regiester");
-			 				reject("this user already regiester");
+			 				reject("发送交易失败!");
 			 			}
-			 		}).catch(err => {
-			 			reject(err);
+			 		}).catch(err1 => {
+			 			console.log("Send Fail:", err1);
+			 			reject(err1);
 			 		});
-				});
-			});
+				}).catch(err => {
+		 			console.log("Sign Fail:", err);
+		 			reject(err);
+		 		});;
+			}).catch(err => {
+	 			console.log("GetTransactionCount Fail:", err);
+	 			reject(err);
+	 		});
 		});	 	
 }
 
@@ -398,6 +401,9 @@ function getHouseBasic(contract, houseId) {
 	return new Promise((resolve, reject) => {
 		contract.methods.getHouseBasicInfo(houseId).call().then(res => {
 			console.log(res);
+		}).catch(err => {
+			console.log("get house basic information err:", err);
+			reject(err);
 		});
 	});
 }
