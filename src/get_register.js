@@ -104,7 +104,7 @@ function login(contract, privateKey, addr, username, pwd) {
                     }  
 				}).catch(err => {
 					console.log("Login fail！");
-					reject({status:false, err: "请检查余额是否不足或者是否已注册!"});
+					reject({status:false, err: "请检查余额是否不足,是否已注册,地址是否正确!"});
 				});
 			} else {
 				resolve({status:false, err: "该用户已登录!"});			
@@ -201,6 +201,7 @@ function packSendMsg(formAddr, privateKey, toAddr, createABI) {
 				web3.eth.accounts.signTransaction(txParams, privateKey).then(signedTx => {
 					console.log("start send the transaction")
 			 		web3.eth.sendSignedTransaction(signedTx.rawTransaction).then(receipt => {
+			 			console.log("send sign receive", receipt);
 			 			if (receipt.status) {
 			 				console.log(receipt.transactionHash)
 			 				resolve(receipt);

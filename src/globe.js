@@ -10,6 +10,7 @@ let comCos = require("./common/globe.js");
 
 // db opt
 let addrManager = require("./db/addr.js");
+let houseManager = require("./db/house.js");
 
 let configuration = initParam.configuration;
 let regLists = new Map();
@@ -76,9 +77,7 @@ function initialize() {
       console.log("start login contract");
       RegisterFun.login(con, req.params.prikey, req.params.address,
           req.params.username, req.params.pwd).then(ctx => {
-        if (ctx) { // Already sign
-          res.send(ctx);
-        }
+        res.send(ctx);
       }).catch(err => {
           console.log("Login callback", err);
           res.send(err);
@@ -168,9 +167,7 @@ function initialize() {
       setResHeadr(res);
       contractHouse.then(con => {
         HouseFun.releaseHouse(conn, con, contractToken, req.params.address, req.params.prikey, req.params.houseaddr, 0, req.params.des, req.params.info, req.params.tenancy, req.params.rent, req.params.hopectx).then(ctx => {
-          if (ctx) { // Already sign
-            res.send(ctx);
-          }
+          res.send(ctx);
         }).catch(err => {
           res.send(err);
         });
@@ -181,21 +178,31 @@ function initialize() {
         });
       });
   });
-  // 签订意向
+  // 获取发布的房源
+  app.get('/gethouse/:houseid/:housestate', (req, res) => {
+      console.log("-----release house params----", req.params)
+      setResHeadr(res);
+      houseManager.queryReleaseInfo(conn, req.params.houseid,req.params.housestate).then(ctx => {
+          console.log(ctx)
+          res.send(ctx);
+      }).catch(err => {
+          console.log("get address error", err)
+          res.send({status: 204, err: err});
+      });
+  });
+  // 预定房屋
   app.get('/requestsign/:address/:prikey/:houseid/:realrent', (req, res) => {
       console.log("-----request sign house params----", req.params)
-      HouseFun.requestSign(contractHouse, req.params.address, req.params.prikey, req.params.houseid, req.params.realrent).then(ctx => {
-       if (ctx) { // Already sign
+      setResHeadr(res);
+      contractHouse.then(con => {
+          HouseFun.requestSign(con, req.params.address, req.params.prikey, req.params.houseid, req.params.realrent).then(ctx => {
+            res.send(ctx);
+          }).catch(err => {
             res.send({
-              "status": ctx.status,
-              "txHash": ctx.transactionHash
+              "status": false,
+              "err": err
             });
-          }
-     }).catch(err => {
-        res.send({
-          "status": false,
-          "err": err
-        });
+          });
       });
   });
   // 签订合同

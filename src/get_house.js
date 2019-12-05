@@ -3,6 +3,7 @@ let filePath = "./ethererscan/house_abi.json";
 let web3 = require("./common/contract_com.js").web3;
 let Web3EthAbi = require('web3-eth-abi');
 let comVar = require("./common/globe.js");
+let dbFun = require("./db/house.js");
 let nonceMap = new Map();
 let RegisterFun = require("./get_register");
 let TokenFun = require("./get_token");
@@ -70,7 +71,7 @@ async function initHouseFun() {
 
 function checkLogin(addr) {
 	// 必须先登录
-	return new Promise((resolve) => {
+	return new Promise((resolve, reject) => {
 		RegisterFun.initReg().then(con => {
 			RegisterFun.isLogin(con, addr).then(res => {
 				resolve(res);
@@ -89,13 +90,15 @@ function releaseHouse(db, contract, contractToken, addr, privateKey, houseAddr, 
 	return new Promise((resolve, reject) => {
 		console.log("release===")
 		contractToken.then(con => {
+			console.log(addr.length, addr);
 			TokenFun.getBalance(con, addr).then(bal => {
 				console.log("bal", bal, typeof(bal), bal.length)
 				let n = bal.length;
 				let newBal;
 				if (n > 6) {
-				   let temp = bal.splice(n-6, 6);
+				   let temp = bal.slice(0, -6);
 				   let newBal = parseFloat(temp);
+				   console.log("After parese value", temp, newBal);
 				   if (newBal < comVar.promiseAmount) {
 				   		resolve({status: false, err: "RentToken数量不能满足保证金要求!余额为："+newBal})
 				   } else {
@@ -110,18 +113,24 @@ function releaseHouse(db, contract, contractToken, addr, privateKey, houseAddr, 
 						    packSendMsg(addr, privateKey, contractAddress, relABI).then(receipt => {
 					        	if (receipt) {
 					        		console.log("Release house success!");
-					        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'RelBasic');
+					        		let tx_hash="", house_hash="";
+					        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'RelBasic');
 				                    if (flag) {
-				                    	console.log("release house receive: ", ctx)
-				                    	resolve({status:flag, data:{trans: ctx.transactionHash, houseId: decodeLog.houseHash}});
-				                    	
+				                    	console.log("release house receive: ", ctx, logRes);
+				                    	tx_hash = ctx.transactionHash;
+				                    	house_hash = logRes.houseHash;
+				                    	console.log("===house_hash==", logRes, house_hash)
+				                    	resolve({status:flag, data:{trans: ctx.transactionHash, houseId: logRes.houseHash}});
 				                    } else {
 				                    	resolve({status:false, err:"发布房源失败!"});
 				                    } 
+				                    const house_state = comVar.houseState.Release;
+				                    console.log("house state:", house_state, house_hash);
+				                    dbFun.insertRealseInfo(db, "", addr, houseAddr, huxing, des, info, tenancy, rent, hopeCtx, house_state, tx_hash, house_hash);
 					        	}
 							}).catch(err => {
 								console.log("Release fail!", err);
-								reject({status:false, err:err});
+								reject({status:false, err:"请检查房屋是否已认证，余额是否满足保证金最少要求！"});
 							});
 						}
 					}).catch(err1 => {
@@ -133,6 +142,7 @@ function releaseHouse(db, contract, contractToken, addr, privateKey, houseAddr, 
 					resolve({status: false, err: "RentToken余额不能满足发布房屋保证金的要求！"})
 				}
 			}).catch(err => {
+				console.log("get balance parse error", err);
 				reject({status: false, err: err});
 			})
 		});
@@ -147,13 +157,14 @@ function requestSign(contract, addr, privateKey, houseId, realRent) {
 				console.log("Please login in first");
 				resolve({status: false, err: "请先登录！"});
 			} else {
+				console.log("=request sign=", houseId, realRent);
 				const reqFun = contract.methods.requestSign(houseId, realRent);
 			    const reqABI = reqFun.encodeABI();
 			    console.log("Start request!", addr);
 			    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
 		        	if (receipt) {
 		        		console.log("Request the house success!");
-		        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'RequestSign');
+		        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'RequestSign');
 	                    if (flag) {
 	                    	console.log("request house receive: ", ctx)
 	                    	resolve({status:flag, data: ctx.transactionHash});
@@ -162,6 +173,7 @@ function requestSign(contract, addr, privateKey, houseId, realRent) {
 	                    } 
 		        	} else {
 		        		console.log("Release house fail!");
+		        		resolve({status:false, err:"请求签订房源失败!"});
 		        	}
 				}).catch(err => {
 					console.log("Release fail!", err);
@@ -186,7 +198,7 @@ function signAgreement(contract, addr, privateKey, houseId, name, signHowLong, r
 			    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
 		        	if (receipt) {
 		        		console.log("Sign success!");
-		        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'SignContract');
+		        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'SignContract');
 	                    if (flag) {
 	                    	console.log("request house receive: ", ctx)
 	                    	resolve({status:flag, data: ctx.transactionHash});
@@ -210,7 +222,7 @@ function withdraw(contract, addr, privateKey, houseId, amount) {
 	    packSendMsg(addr, privateKey, contractAddress, withABI).then(receipt => {
         	if (receipt) {
         		console.log("Withdraw the coin success!");
-        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'WithdrawDeposit');
+        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'WithdrawDeposit');
                 if (flag) {
                 	console.log("withdraw the promise receive: ", ctx)
                 	resolve({status:flag, data: ctx.transactionHash});
@@ -245,7 +257,7 @@ function breakContract(contract, addr, privateKey, houseId, reason) {
 		        			  	reject(false);
 		        			  }
 		        		});
-		        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'BreakContract');
+		        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'BreakContract');
 		                if (flag) {
 		                	console.log("Break the contract receive: ", ctx)
 		                	resolve({status:flag, data: ctx.transactionHash});
@@ -275,7 +287,7 @@ function checkBreak(contract, addr, privateKey, houseId, punishAmount, punishAdd
 			    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
 		        	if (receipt) {
 		        		console.log("Check Break Contract success!");
-		        		let [flag, ctx, decodeLog] = decodeLog(contract, receipt, 'ApprovalBreak');
+		        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'ApprovalBreak');
 		                if (flag) {
 		                	console.log("Check Break the contract receive: ", ctx)
 		                	resolve({status:flag, data: ctx.transactionHash});
@@ -343,10 +355,11 @@ function decodeLog(contract, receipt, eventName) {
 	const eventJsonInterface = contract._jsonInterface.find(
       o => (o.name === eventName) && o.type === 'event');
     if (JSON.stringify(receipt.logs) != '[]') {
-      const log = receipt.logs.find(
-        l => l.topics.includes(eventJsonInterface.signature)
-      );
-        console.log(decodeLog)
+        const log = receipt.logs.find(
+          l => l.topics.includes(eventJsonInterface.signature)
+        );
+        let decodeLog = Web3EthAbi.decodeLog(eventJsonInterface.inputs, log.data, log.topics.slice(1));
+        console.log("==decode log==",decodeLog)
         return [true, receipt, decodeLog];
     } else {
       return [false, "Cannt find logs", {}];

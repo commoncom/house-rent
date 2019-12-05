@@ -12,6 +12,14 @@ const authConAddr= "0x0455633466ab2091171489c4c85103b530371bdb";
 const houseConAddr = "0x92bbb2a177e747620c27649aee88c14ecd7221f5";
 
 const promiseAmount = 50;
+const houseState = {
+	Release: 0,
+	WaitRent: 1,
+	Renting: 2,
+	EndRent: 3,
+	Cance: 4,
+	BreakRent: 5
+}
 module.exports = {
 	disAmount,
 	disAddr,
@@ -23,6 +31,7 @@ module.exports = {
 	remarkConAddr,
 	authConAddr,
 	houseConAddr,
-	promiseAmount
+	promiseAmount,
+	houseState
 }
 

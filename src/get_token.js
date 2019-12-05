@@ -11,7 +11,7 @@ async function initToken() {
 }
 
 // initToken().then(con => {
-//    let addr = "0xaDCe9984d4d2E3936A0eB6F21a6105217a3E8766";
+//    let addr = "0xb829d1285c19462C85f935774458BE90aE9E8973";
 //    getBalance(con, addr).then(res => {
 //      console.log(res);
 //    });
@@ -23,9 +23,9 @@ async function initToken() {
 //    let privKey2 = "0xEAEC183C4BADF7D89DEEF365F668C5D1C4FD47ADDC835F75EA2B572DA2502953";
 //    let addr3 = "0x5b0ccb1c93064Eb8Fd695a60497240efd94A44ed";
 //    let privKey3 = "0x502D29356356AE02B7E23ECC851CCA0F21FE9CDADEF1FBAB158EB82611F27229";
-//    transfer(con, addr3, privKey3, addr2, addr3, 200000000).then((receipt, reject) => {
-//      console.log(receipt.transactionHash)
-//    });
+//    // transfer(con, addr3, privKey3, addr2, addr3, 200000000).then((receipt, reject) => {
+//    //   console.log(receipt.transactionHash)
+//    // });
 //    let spender = "0x5b0ccb1c93064Eb8Fd695a60497240efd94A44ed";
 //    // approveTransfer(con, addr, privKey, spender, 10000000000).then((receipt, reject) => {
 //    //  console.log(receipt.transactionHash);
@@ -37,9 +37,9 @@ function getBalance(contract, addr) {
     console.log("enter into get balance")
     contract.methods.balanceOf(addr).call().then(res => {
       console.log("get the balance",res);
-      resolve(res)
+      resolve(res);
     }).catch(err => {
-      console.log(err);
+      console.log("get bal error:",err);
       reject(err);
     });
   });
