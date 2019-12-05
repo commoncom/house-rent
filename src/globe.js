@@ -209,13 +209,8 @@ function initialize() {
   app.get('/sign/:address/:prikey/:name/:signlong/:rental/:yearrent', (req, res) => {
       console.log("-----sign house params----", req.params)
       HouseFun.signAgreement(contractHouse, req.params.address, req.params.prikey, req.params.name, req.params.signlong, req.params.rental, req.params.yearrent).then(ctx => {
-       if (ctx) { // Already sign
-            res.send({
-              "status": ctx.status,
-              "txHash": ctx.transactionHash
-            });
-          }
-     }).catch(err => {
+          res.send(ctx);
+      }).catch(err => {
         res.send({
           "status": false,
           "err": err
