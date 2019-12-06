@@ -100,7 +100,7 @@ function login(contract, privateKey, addr, username, pwd) {
             	resolve({status:false, err:"登录失败!"});
             }  
 		}).catch(err => {
-			console.log("Login fail！");
+			console.log("Login fail！", err);
 			reject({status:false, err: "请检查余额是否不足,是否已注册，是否已登录,地址是否正确!"});
 		});
     });

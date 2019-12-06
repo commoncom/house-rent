@@ -185,35 +185,32 @@ function requestSign(contract, addr, privateKey, houseId, realRent) {
 	});
 }
 
-function signAgreement(contract, addr, privateKey, houseId, name, signHowLong, rental, yearRent) {
+// function signAgreement(contract, addr, privateKey, houseId, name, signHowLong, rental, yearRent) {
+function signAgreement(contract, username, houseId, houseAddr, falsify, phoneNum, idCard, signHowLong, rental, houseDeadline, addr, privateKey) {	
 	return new Promise((resolve, reject) => {
-		checkLogin(addr).then(flag => {
-			if (!flag) {
-				console.log("Please login in first");
-				resolve({status: false, err: "请先登录！"});
-			} else {
-				const reqFun = contract.methods.signAgreement(houseId, name, signHowLong, rental, yearRent);
-			    const reqABI = reqFun.encodeABI();
-			    console.log("Start sign the agreement!", addr);
-			    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
-		        	if (receipt) {
-		        		console.log("Sign success!");
-		        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'SignContract');
-	                    if (flag) {
-	                    	console.log("request house receive: ", ctx)
-	                    	resolve({status:flag, data: ctx.transactionHash});
-	                    } else {
-	                    	resolve({status:false, err:"签订合同失败!"});
-	                    }
-		        	} 
-				}).catch(err => {
-					console.log("Sign fail!", err);
-					reject({status: false, err: err});
-				});
-			}
+		console.log("==start=signAgreement=")
+		let yearRent = 12*rental;
+		const reqFun = contract.methods.signAgreement(houseId, username, signHowLong, rental, yearRent);
+	    const reqABI = reqFun.encodeABI();
+	    console.log("Start sign the agreement!", addr);
+	    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
+        	if (receipt) {
+        		console.log("Sign success!");
+        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'SignContract');
+                if (flag) {
+                	console.log("request house receive: ", ctx)
+                	resolve({status:flag, data: ctx.transactionHash});
+                } else {
+                	resolve({status:false, err:"签订合同失败!"});
+                }
+        	} 
+		}).catch(err => {
+			console.log("Sign fail!", err);
+			reject({status: false, err: "请检查是否已经登录、余额能否满足租金要求、是否已预订该房屋！"});
 		});
 	});
 }
+
 
 function withdraw(contract, addr, privateKey, houseId, amount) {
 	return new Promise((resolve, reject) => {

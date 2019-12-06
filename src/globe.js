@@ -206,15 +206,24 @@ function initialize() {
       });
   });
   // 签订合同
-  app.get('/sign/:address/:prikey/:name/:signlong/:rental/:yearrent', (req, res) => {
-      console.log("-----sign house params----", req.params)
-      HouseFun.signAgreement(contractHouse, req.params.address, req.params.prikey, req.params.name, req.params.signlong, req.params.rental, req.params.yearrent).then(ctx => {
-          res.send(ctx);
+  // app.get('/sign/:address/:prikey/:name/:signlong/:rental/:yearrent', (req, res) => {
+  app.get('/sign/:username/:idcard/:phonenum/:rental/:tenacy/:houseid/:houseaddr/:falsify/:housedeadline/:addr/:prikey', (req, res) => {
+      console.log("-----sign house params----", req.params);
+      setResHeadr(res);
+      let params = req.params;
+      contractHouse.then(con => {
+          console.log("sign agreement");
+          HouseFun.signAgreement(con, params.username, params.houseid, params.houseaddr, params.falsify, params.phonenum, params.idcard,
+           params.tenacy, params.rental, params.housedeadline, params.addr, params.prikey).then(ctx => {
+            res.send(ctx);
+          }).catch(err => {
+            res.send(err);
+          });
       }).catch(err => {
-        res.send({
-          "status": false,
-          "err": err
-        });
+          res.send({
+            "status": false,
+            "err": err
+          });
       });
   });
   // 毁约
