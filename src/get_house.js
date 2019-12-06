@@ -214,6 +214,7 @@ function signAgreement(contract, username, houseId, houseAddr, falsify, phoneNum
 
 function withdraw(contract, addr, privateKey, houseId, amount) {
 	return new Promise((resolve, reject) => {
+		console.log("==withdraw==", addr, houseId);
 		const withFun = contract.methods.withdraw(houseId, amount);
 	    const withABI = withFun.encodeABI();
 	    packSendMsg(addr, privateKey, contractAddress, withABI).then(receipt => {
@@ -228,7 +229,7 @@ function withdraw(contract, addr, privateKey, houseId, amount) {
                 }
         	} 
 		}).catch(err => {
-			console.log("Withdraw occure error!");
+			console.log("Withdraw occure error!", err);
 			reject({stats: false, err: err});
 		});
 	});

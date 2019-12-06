@@ -263,18 +263,19 @@ function initialize() {
   // 退币
   app.get('/withdraw/:address/:prikey/:houseid/:amount', (req, res) => {
       console.log("-----withdraw coin params----", req.params)
-      HouseFun.withdraw(contractHouse, req.params.address, req.params.prikey, req.params.houseid, req.params.amount).then(ctx => {
-       if (ctx) { // Already sign
-            res.send({
-              "status": ctx.status,
-              "txHash": ctx.transactionHash
-            });
-          }
-     }).catch(err => {
-        res.send({
-          "status": false,
-          "err": err
-        });
+      setResHeadr(res);
+      contractHouse.then(con => {
+          HouseFun.withdraw(con, req.params.address, req.params.prikey, req.params.houseid, req.params.amount).then(ctx => {
+              res.send(ctx);
+          }).catch(err => {
+              console.log("==init house error==", err)
+              res.send(err);
+          });
+      }).catch(err => {
+          res.send({
+            "status": false,
+            "err": err
+          });
       });
   });
   // 评论房屋
