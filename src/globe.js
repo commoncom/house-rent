@@ -228,19 +228,17 @@ function initialize() {
   });
   // 毁约
   app.get('/break/:address/:prikey/:houseid/:reason', (req, res) => {
-      console.log("-----sign house params----", req.params)
-      HouseFun.breakContract(contractHouse, req.params.address, req.params.prikey, req.params.houseid, req.params.reason).then(ctx => {
-       if (ctx) { // Already sign
+      console.log("-----sign house params----", req.params);
+      setResHeadr(res);
+      contractHouse.then(con => {
+          HouseFun.breakContract(con, req.params.address, req.params.prikey, req.params.houseid, req.params.reason).then(ctx => {
+             res.send(ctx);
+          }).catch(err => {
             res.send({
-              "status": ctx.status,
-              "txHash": ctx.transactionHash
+              "status": false,
+              "err": err
             });
-          }
-     }).catch(err => {
-        res.send({
-          "status": false,
-          "err": err
-        });
+          });
       });
   });
   // 审查毁约

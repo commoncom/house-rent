@@ -177,7 +177,7 @@ function requestSign(contract, addr, privateKey, houseId, realRent) {
 		        	}
 				}).catch(err => {
 					console.log("Release fail!", err);
-					reject({status: false, err: err});
+					reject({status: false, err: "请检查该房屋是否已经被预定，余额是否充足!"});
 				});
 			}
 		});
