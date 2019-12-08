@@ -149,7 +149,7 @@ function releaseHouse(db, contract, contractToken, addr, privateKey, houseAddr, 
 	});
 }
 
-function requestSign(contract, addr, privateKey, houseId, realRent) {
+function requestSign(db, contract, addr, privateKey, houseId, realRent) {
 	return new Promise((resolve, reject) => {
 		// Judge whether the user has logged in
 		checkLogin(addr).then(flag => {
@@ -168,6 +168,8 @@ function requestSign(contract, addr, privateKey, houseId, realRent) {
 	                    if (flag) {
 	                    	console.log("request house receive: ", ctx)
 	                    	resolve({status:flag, data: ctx.transactionHash});
+	                    	let house_state = comVar.houseState.WaitRent;
+	                    	dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
 	                    } else {
 	                    	resolve({status:false, err:"请求签订房源失败!"});
 	                    } 
@@ -186,7 +188,7 @@ function requestSign(contract, addr, privateKey, houseId, realRent) {
 }
 
 // function signAgreement(contract, addr, privateKey, houseId, name, signHowLong, rental, yearRent) {
-function signAgreement(contract, username, houseId, houseAddr, falsify, phoneNum, idCard, signHowLong, rental, houseDeadline, addr, privateKey) {	
+function signAgreement(db, contract, username, houseId, houseAddr, falsify, phoneNum, idCard, signHowLong, rental, houseDeadline, addr, privateKey) {	
 	return new Promise((resolve, reject) => {
 		console.log("==start=signAgreement=")
 		let yearRent = 12*rental;
@@ -200,6 +202,8 @@ function signAgreement(contract, username, houseId, houseAddr, falsify, phoneNum
                 if (flag) {
                 	console.log("request house receive: ", ctx)
                 	resolve({status:flag, data: ctx.transactionHash});
+                	let house_state = comVar.houseState.Renting;
+	                dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
                 } else {
                 	resolve({status:false, err:"签订合同失败!"});
                 }

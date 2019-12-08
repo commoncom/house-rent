@@ -60,7 +60,7 @@ function queryReleaseInfo(conn, houseId, houseState) {
 	});
 }
 // 更新发布房屋信息
-function updateReleaseInfo(conn, state, userId, addr) {
+function updateReleaseInfo(conn, userId, houseId, addr, state) {
 	console.log("-------update Release Info---------", userId, addr)
 	return new Promise((resolve, reject) => {
 		conn.then(con => {

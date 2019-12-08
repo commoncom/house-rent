@@ -34,7 +34,7 @@ function initialize() {
         console.log(ctx)
         res.send(ctx);
     }).catch(err => {
-        console.log("bind address err:", err)
+        // console.log("bind address err:", err)
         res.send({status: false, err: err});
     });
   });
@@ -45,7 +45,7 @@ function initialize() {
         console.log(ctx)
         res.send(ctx);
     }).catch(err => {
-        console.log("get address error", err)
+        // console.log("get address error", err)
         res.send({status: 204, err: err});
     });
   });
@@ -74,6 +74,7 @@ function initialize() {
     console.log("-----login params----", req.params)
     setResHeadr(res);
     contractReg.then(con => {
+      console.time("login");
       console.log("start login contract");
       RegisterFun.login(con, req.params.prikey, req.params.address,
           req.params.username, req.params.pwd).then(ctx => {
@@ -82,8 +83,9 @@ function initialize() {
           console.log("Login callback", err);
           res.send(err);
       });
+      console.timeEnd("login")
     }).catch(err => {
-      console.log("login err", err);
+      // console.log("login err", err);
       res.send({
         "status": false,
         "err": err
@@ -94,12 +96,7 @@ function initialize() {
     console.log("-----get adddress params----", req.params)
     contractReg.then(con => {
       RegisterFun.logout(con, req.params.prikey, req.params.address,req.params.username, req.username.pwd).then(ctx => {
-        if (ctx) { // Already sign
-          res.send({
-            "status": ctx.status,
-            "txHash": ctx.transactionHash
-          });
-        }
+         res.send(ctx);
       });
     }).catch(err => {
       res.send({
@@ -112,12 +109,7 @@ function initialize() {
   app.get('/transfer/:address/:to/:amount/:prikey', (req, res) => {
     console.log("-----get transfer params----", req.params)
     TokenFun.transfer(contractToken, req.params.address, req.params.prikey, req.params.address, req.params.to, req.params.amount).then(ctx => {
-       if (ctx) { // Already sign
-          res.send({
-            "status": ctx.status,
-            "txHash": ctx.transactionHash
-          });
-        }
+        res.send(ctx);
     }).catch(err => {
       res.send({
         "status": false,
@@ -129,12 +121,7 @@ function initialize() {
   app.get('/transferEth/:address/:to/:amount/:prikey', (req, res) => {
       console.log("-----get transfer eth params----", req.params)
       TokenFun.transfer(contractToken, req.params.prikey, req.params.address, req.params.to, req.params.amount).then(ctx => {
-         if (ctx) { // Already sign
-            res.send({
-              "status": ctx.status,
-              "txHash": ctx.transactionHash
-            });
-          }
+          res.send(ctx);
       }).catch(err => {
         res.send({
           "status": false,
@@ -148,9 +135,7 @@ function initialize() {
       setResHeadr(res);
       contractAuth.then(con => {
          AuthFun.authHouse(con, req.params.address, req.params.idcard, req.params.guid, req.params.ownername, req.params.userid, req.params.prikey).then(ctx => {
-           if (ctx) { 
-                res.send(ctx);
-            }
+            res.send(ctx);
          }).catch(err => {
             res.send(err);
          });
@@ -195,7 +180,7 @@ function initialize() {
       console.log("-----request sign house params----", req.params)
       setResHeadr(res);
       contractHouse.then(con => {
-          HouseFun.requestSign(con, req.params.address, req.params.prikey, req.params.houseid, req.params.realrent).then(ctx => {
+          HouseFun.requestSign(conn, con, req.params.address, req.params.prikey, req.params.houseid, req.params.realrent).then(ctx => {
             res.send(ctx);
           }).catch(err => {
             res.send({
@@ -213,7 +198,7 @@ function initialize() {
       let params = req.params;
       contractHouse.then(con => {
           console.log("sign agreement");
-          HouseFun.signAgreement(con, params.username, params.houseid, params.houseaddr, params.falsify, params.phonenum, params.idcard,
+          HouseFun.signAgreement(conn, con, params.username, params.houseid, params.houseaddr, params.falsify, params.phonenum, params.idcard,
            params.tenacy, params.rental, params.housedeadline, params.addr, params.prikey).then(ctx => {
             res.send(ctx);
           }).catch(err => {
@@ -245,12 +230,7 @@ function initialize() {
   app.get('/checkbreak/:address/:prikey/:houseid/:punishamount/:punishaddr', (req, res) => {
       console.log("-----check break agreement params----", req.params)
       HouseFun.checkBreak(contractHouse, req.params.address, req.params.prikey, req.params.houseid, req.params.punishamount, req.params.punishaddr).then(ctx => {
-       if (ctx) { // Already sign
-            res.send({
-              "status": ctx.status,
-              "txHash": ctx.transactionHash
-            });
-          }
+        res.send(ctx);
      }).catch(err => {
         res.send({
           "status": false,

@@ -13,25 +13,25 @@ RegisterFun.initReg().then(con => {
 	let addr2 = "0x5b0ccb1c93064Eb8Fd695a60497240efd94A44ed";
 	let priKey2 = "0x502D29356356AE02B7E23ECC851CCA0F21FE9CDADEF1FBAB158EB82611F27229";
 	let username2 = "ym";
-	let addr4 = "0xcb1a734d3b8594d8e1b0bfbcdae08ff356412aa8";
-	let priKey4 = "0xd10e652d28ce372182988f9de1064637380fe6310752efcfcbe120aedc347543";
-	let username4 = "best2071";
+	let addr4 = "0x478aeeeb794a1098ee9d52db8a4bd1c70ec68be9";
+	let priKey4 = "0x3be1831284af07413ac1b7b678c7360e177d66c1bbd0593de7b99a96da4bc98b";
+	let username4 = "best2076";
 	// let pwd = "pwd";
-	// RegisterFun.login(con, priKey4, addr4, username4, pwd).then((res, rej) => {
-	// 	console.log(4343, res);
-	// 	RegisterFun.isLogin(con, addr4).then(res => {
-	// 		console.log("isLogin", 444, res)
-	// 	});
-	// });
-	let addr3 = "0xcb1a734d3b8594d8e1b0bfbcdae08ff356412aa8";
+	RegisterFun.login(con, priKey4, addr4, username4, pwd).then((res, rej) => {
+		console.log(4343, res);
+		RegisterFun.isLogin(con, addr4).then(res => {
+			console.log("isLogin", 444, res)
+		});
+	});
+	let addr3 = "0x17B0477C515A5615f18F0E70DF144D4ec13607cf";
 	let priKey3 = "0x052719F3BB83E6081F064CBF4A2087067CD55F088404D0A20DB5CDCB075D867B";
 	let username3 = "ym2"; 
 	// login(con, priKey3, addr3, username3, pwd).then((res, rej) => {
 	// 	console.log(4343, res);
-	RegisterFun.isLogin(con, addr3).then(res => {
-		console.log("isLogin", 444, res)
+	// RegisterFun.isLogin(con, addr3).then(res => {
+	// 	console.log("isLogin", 444, res)
 
-	});
+	// });
 	// });
 	// logout(con, priKey, addr, username, pwd).then((res, rej) => {
 	// 	console.log(res);

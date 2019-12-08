@@ -48,6 +48,7 @@ function createUser(contract, addr, username, userId, pwd, cardId) {
     			// const loginFun = contract.methods.createUser(addr, username, userId, pwd);   // 合约需要加入id
                 const loginFun = contract.methods.createUser(addr, username, pwd, userId, cardId);
                 const logABI = loginFun.encodeABI();
+                console.log("addr", comCos.regAddr);
                 packSendMsg(comCos.regAddr, comCos.regpri, contractAddress, logABI).then(receipt => {                        
                     console.log("create user rece", receipt);
                     let [flag, ctx] = decodeLog(contract, receipt, 'CreateUser');
@@ -89,20 +90,28 @@ function decodeLog(contract, receipt, eventName) {
 // Or, the user must login firstly.
 function login(contract, privateKey, addr, username, pwd) {
 	return new Promise((resolve, reject) => {
+		addr = addr.replace(/\s+/g,'')
 		const loginFun = contract.methods.login(addr, username, pwd);
         const logABI = loginFun.encodeABI();
+        console.time("packSendMsg");
+        console.log("packsendmsg", privateKey, addr, username, pwd)
         packSendMsg(addr, privateKey, contractAddress, logABI).then(receipt => {  
-            console.log("Login callback: ", receipt) 
+            console.log("Login callback: ", receipt);
 			let [flag, ctx] = decodeLog(contract, receipt, 'LoginEvent');
             if (flag) {
-            	resolve({status:flag, data:ctx.transactionHash});
+            	resolve({status:flag, data: ctx.transactionHash});
             } else {
             	resolve({status:false, err:"登录失败!"});
-            }  
+            } 
+            for (let i=1; i<10; i++) {
+
+        	}
+        	console.log("login after resolve"); 
 		}).catch(err => {
 			console.log("Login fail！", err);
 			reject({status:false, err: "请检查余额是否不足,是否已注册，是否已登录,地址是否正确!"});
 		});
+		console.timeEnd("packSendMsg")
     });
 }
 
@@ -187,11 +196,13 @@ function packSendMsg(formAddr, privateKey, toAddr, createABI) {
 			      chainId: 3,
 			      nonce: '0x' + nonce
 				}
+				console.time("signTransaction");
 				console.log("start sign the transaction")
 				web3.eth.accounts.signTransaction(txParams, privateKey).then(signedTx => {
 					console.log("start send the transaction")
+					console.time("sendSignedTransaction");
 			 		web3.eth.sendSignedTransaction(signedTx.rawTransaction).then(receipt => {
-			 			console.log("send sign receive", receipt);
+			 			// console.log("send sign receive", receipt);
 			 			if (receipt.status) {
 			 				console.log(receipt.transactionHash)
 			 				resolve(receipt);
@@ -202,10 +213,12 @@ function packSendMsg(formAddr, privateKey, toAddr, createABI) {
 			 			console.log("Send Fail:", err1);
 			 			reject(err1);
 			 		});
+			 		console.timeEnd("sendSignedTransaction");
 				}).catch(err => {
 		 			console.log("Sign Fail:", err);
 		 			reject(err);
 		 		});;
+		 		console.timeEnd("signTransaction")
 			}).catch(err => {
 	 			console.log("GetTransactionCount Fail:", err);
 	 			reject(err);
