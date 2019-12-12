@@ -3,14 +3,14 @@ function insertApproRecord(conn, leaser_addr, landlord_addr, house_id) {
 	console.log("-------insertApproRecord---------", house_id);
 	return new Promise((resolve, reject) => {
 		conn.then(con => {
-			con.query("SELECT * FROM house_approve_record WHERE landlord_addr = ? and house_id = ? ", [landlord_addr, house_id],  function (err, result, fields) {
+			con.query("SELECT * FROM house_approve_record WHERE leaser_addr = ? and house_id = ? ", [leaser_addr, house_id],  function (err, result, fields) {
 			    if (err) {
 			    	console.log("--auth insert query error:", err);
 			    	resolve({status: 203, err: err})
 			    }
 			    console.log(result)
 			    if (result != null && result.length != 0) {
-			    	resolve({status:201, data: result[0].addr});
+			    	resolve({status:201, data: result[0].landlord_addr});
 			    } else {
 			    	// 插入map表
 					let insertSql = "INSERT INTO house_approve_record (`leaser_addr`, `landlord_addr`, `house_id`, `state`, `createtime`, `updatetime`) VALUES ?";
@@ -32,13 +32,20 @@ function insertApproRecord(conn, leaser_addr, landlord_addr, house_id) {
 		});
 	});
 }
-// 查询发布房屋信息, userId是Phone Number
+// 查询房屋授权信息, houseId是房屋ID
 function queryApprove(conn, houseId) {
-	console.log("-------queryApprove---------", houseId, houseState)
+	console.log("-------queryApprove---------", houseId)
 	return new Promise((resolve, reject) => {
 		conn.then(con => {
-			let sql = "SELECT * FROM house_approve_record WHERE house_id = ?";
-			con.query(sql, [houseId],  function (err, result, fields) {
+			let sql, criteria;
+			if (houseId == '0x') {
+				sql = "SELECT * FROM house_approve_record";
+				criteria = [];
+			} else {
+				sql = "SELECT * FROM house_approve_record WHERE house_id = ?";
+				criteria = [houseId];
+			} 
+			con.query(sql, criteria,  function(err, result, fields) {
 			    if (err) {
 			    	console.log("--auth insert query error:", err);
 			    	resolve({status: false, err: err});
@@ -52,14 +59,15 @@ function queryApprove(conn, houseId) {
 	});
 }
 // 更新发布房屋信息
-function updateAuthInfo(conn, houseId, state) {
-	console.log("-------update auth Info---------", userId, addr)
+// addr为租客地址
+function updateAuthInfo(conn, houseId, addr, state) {
+	console.log("-------update auth Info---------", houseId, addr)
 	return new Promise((resolve, reject) => {
 		conn.then(con => {
-			con.query("UPDATE `house_approve_record` SET `house_state` = ?, `updatetime` = ? WHERE `house_id` = ?", [state, Date.now(), houseId], function(err, result, fileds){
+			con.query("UPDATE `house_approve_record` SET `state` = ?, `updatetime` = ? WHERE `house_id` = ? AND `leaser_addr` = ?", [state, Date.now(), houseId, addr], function(err, result, fileds){
 				console.log("---update ---", result);
 			});
-			con.query("SELECT * FROM house_approve_record WHERE house_id = ? ", [houseId],  function (err, result, fields) {
+			con.query("SELECT * FROM house_approve_record WHERE house_id = ? AND `leaser_addr` = ?", [houseId, addr],  function (err, result, fields) {
 			    if (err) {
 			    	console.log("Query auth after update info" ,err);
 			    	resolve({status: false, err: err});
@@ -76,7 +84,6 @@ function updateAuthInfo(conn, houseId, state) {
 		});
 	});
 }
-
 
 
 module.exports = {

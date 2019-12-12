@@ -4,6 +4,7 @@ let web3 = require("./common/contract_com.js").web3;
 // let AbiCoder = require("web3-eth-abi");
 let Web3EthAbi = require('web3-eth-abi');
 let comCos = require("./common/globe.js");
+let addrManager = require("./db/addr.js");
 // let contractAddress = "0xb7ff5ab3734091aaa440cad83e492e289f49b9e7";
 let contractAddress = comCos.regConAddr;
 let nonceMap = new Map();
@@ -103,9 +104,7 @@ function login(contract, privateKey, addr, username, pwd) {
             } else {
             	resolve({status:false, err:"登录失败!"});
             } 
-            for (let i=1; i<10; i++) {
-
-        	}
+            addrManager.
         	console.log("login after resolve"); 
 		}).catch(err => {
 			console.log("Login fail！", err);

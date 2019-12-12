@@ -11,6 +11,7 @@ let comCos = require("./common/globe.js");
 // db opt
 let addrManager = require("./db/addr.js");
 let houseManager = require("./db/house.js");
+let authManager = require("./db/auth.js");
 
 let configuration = initParam.configuration;
 let regLists = new Map();
@@ -46,6 +47,18 @@ function initialize() {
         res.send(ctx);
     }).catch(err => {
         // console.log("get address error", err)
+        res.send({status: 204, err: err});
+    });
+  });
+  // 获取用户链上状态
+  app.get('/getstatus/:addr', (req, res) => {
+    console.log("-----get userid and address params----", req.params)
+    setResHeadr(res);
+    addrManager.queryUserStatus(conn, req.params.addr).then(ctx => {
+        console.log(ctx)
+        res.send(ctx);
+    }).catch(err => {
+        console.log("get status error", err)
         res.send({status: 204, err: err});
     });
   });
@@ -134,7 +147,7 @@ function initialize() {
       console.log("-----authenticate house params----", req.params)
       setResHeadr(res);
       contractAuth.then(con => {
-         AuthFun.authHouse(con, req.params.address, req.params.idcard, req.params.guid, req.params.ownername, req.params.userid, req.params.prikey).then(ctx => {
+         AuthFun.authHouse(conn, con, req.params.address, req.params.idcard, req.params.guid, req.params.ownername, req.params.userid, req.params.prikey).then(ctx => {
             res.send(ctx);
          }).catch(err => {
             res.send(err);
@@ -144,6 +157,59 @@ function initialize() {
               "status": false,
               "err": err
             });
+      });
+  });
+  // 请求查看房屋授权
+  app.get('/requestapprove/:houseid/:landlord_addr/:leaser_addr', (req, res) => {
+      console.log("-----request approve params----", req.params)
+      setResHeadr(res);
+      authManager.insertApproRecord(conn, req.params.leaser_addr, req.params.landlord_addr, req.params.houseid).then(ctx => {
+          console.log(ctx)
+          res.send(ctx);
+      }).catch(err => {
+          console.log("request approve error", err)
+          res.send({status: 204, err: err});
+      });
+  });
+  // 授权某个用户访问认证信息
+  app.get('/approve/:houseid/:leaseraddr/:landlordaddr/:prikey', (req, res) => {
+      console.log("-----approve house params----", req.params)
+      setResHeadr(res);
+      contractAuth.then(con => {
+         AuthFun.approveVisit(conn, con, req.params.houseid, req.params.leaseraddr, req.params.landlordaddr, req.params.prikey).then(ctx => {
+            res.send(ctx);
+         }).catch(err => {
+            res.send(err);
+         });
+      }).catch(err => {
+            res.send({
+              "status": false,
+              "err": err
+            });
+      });
+  });
+  // reject approve
+  app.get('/reject/:houseid/:leaser_addr', (req, res) => {
+      console.log("-----release house params----", req.params)
+      setResHeadr(res);
+      authManager.updateAuthInfo(conn, req.params.houseid, req.params.leaser_addr, 2).then(ctx => {
+          console.log(ctx)
+          res.send(ctx);
+      }).catch(err => {
+          console.log("get address error", err)
+          res.send({status: 204, err: err});
+      });
+  });
+  // get auth
+  app.get('/getauth/:houseid', (req, res) => {
+      console.log("-----release house params----", req.params)
+      setResHeadr(res);
+      authManager.queryApprove(conn, req.params.houseid).then(ctx => {
+          console.log(ctx)
+          res.send(ctx);
+      }).catch(err => {
+          console.log("get address error", err)
+          res.send({status: 204, err: err});
       });
   });
   // House 
@@ -212,7 +278,7 @@ function initialize() {
       });
   });
   // 毁约
-  app.get('/break/:address/:prikey/:houseid/:reason', (req, res) => {
+  app.get('/break/:houseid/:reason/:address/:prikey', (req, res) => {
       console.log("-----sign house params----", req.params);
       setResHeadr(res);
       contractHouse.then(con => {
