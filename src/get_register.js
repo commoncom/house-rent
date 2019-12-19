@@ -55,6 +55,7 @@ function createUser(contract, addr, username, userId, pwd, cardId) {
                     let [flag, ctx] = decodeLog(contract, receipt, 'CreateUser');
                     if (flag) {
                     	resolve({status:flag, data:ctx.transactionHash});
+                    	addrManager.updateUserStatus(db, "", addr, 1);
                     } else {
                     	resolve({status:false, err:"注册失败!"});
                     }             
@@ -89,7 +90,7 @@ function decodeLog(contract, receipt, eventName) {
 // First, judge whether user register
 // If user already register, login directly
 // Or, the user must login firstly.
-function login(contract, privateKey, addr, username, pwd) {
+function login(db, contract, privateKey, addr, username, pwd) {
 	return new Promise((resolve, reject) => {
 		addr = addr.replace(/\s+/g,'')
 		const loginFun = contract.methods.login(addr, username, pwd);
@@ -104,7 +105,7 @@ function login(contract, privateKey, addr, username, pwd) {
             } else {
             	resolve({status:false, err:"登录失败!"});
             } 
-            addrManager.
+            addrManager.updateUserStatus(db, "", addr, 2);
         	console.log("login after resolve"); 
 		}).catch(err => {
 			console.log("Login fail！", err);

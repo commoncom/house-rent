@@ -89,7 +89,7 @@ function initialize() {
     contractReg.then(con => {
       console.time("login");
       console.log("start login contract");
-      RegisterFun.login(con, req.params.prikey, req.params.address,
+      RegisterFun.login(conn, con, req.params.prikey, req.params.address,
           req.params.username, req.params.pwd).then(ctx => {
         res.send(ctx);
       }).catch(err => {
@@ -188,6 +188,22 @@ function initialize() {
             });
       });
   });
+  app.get('/getAuthInfo/:houseid/:leaser_addr', (req, res) => {
+      console.log("-----authenticate house params----", req.params)
+      setResHeadr(res);
+      contractAuth.then(con => {
+         AuthFun.getHouseOwer(con, req.params.houseid, req.params.leaser_addr).then(ctx => {
+            res.send(ctx);
+         }).catch(err => {
+            res.send(err);
+         });
+      }).catch(err => {
+            res.send({
+              "status": false,
+              "err": err
+            });
+      });
+  });
   // reject approve
   app.get('/reject/:houseid/:leaser_addr', (req, res) => {
       console.log("-----release house params----", req.params)
@@ -250,7 +266,7 @@ function initialize() {
             res.send(ctx);
           }).catch(err => {
             res.send({
-              "status": false,
+              "status": 201,
               "err": err
             });
           });
@@ -258,14 +274,14 @@ function initialize() {
   });
   // 签订合同
   // app.get('/sign/:address/:prikey/:name/:signlong/:rental/:yearrent', (req, res) => {
-  app.get('/sign/:username/:idcard/:phonenum/:rental/:tenacy/:houseid/:houseaddr/:falsify/:housedeadline/:addr/:prikey', (req, res) => {
+  app.get('/sign/:username/:idcard/:phonenum/:rental/:tenacy/:houseid/:houseaddr/:falsify/:housedeadline/:houseuse/:addr/:prikey', (req, res) => {
       console.log("-----sign house params----", req.params);
       setResHeadr(res);
       let params = req.params;
       contractHouse.then(con => {
           console.log("sign agreement");
           HouseFun.signAgreement(conn, con, params.username, params.houseid, params.houseaddr, params.falsify, params.phonenum, params.idcard,
-           params.tenacy, params.rental, params.housedeadline, params.addr, params.prikey).then(ctx => {
+           params.tenacy, params.rental, params.housedeadline, params.houseuse, params.addr, params.prikey).then(ctx => {
             res.send(ctx);
           }).catch(err => {
             res.send(err);
@@ -422,6 +438,7 @@ function packFail(res, err) {
 
 function setResHeadr(res) {
   res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 }
 
 

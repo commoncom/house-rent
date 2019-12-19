@@ -106,11 +106,13 @@ function approveVisit(db, contract, houseId, addr, approveAddr, arpprovePrikey) 
     });
 }
 
-function getHouseOwer(contract, addr) {
+function getHouseOwer(contract, houseId, addr) {
 	return new Promise((resolve, reject) => {
-		contract.methods.getHouseOwer().call().then(res => {
-			resolve(res);
+		contract.methods.getHouseOwer().call({from:addr}).then(res => {
+			console.log("get house owner", res);
+			resolve({status: true, data: res});
 		}).catch(err => {
+			console.log("get auth info error:", err)
 			reject({status:false, data: err});
 		});
 	})

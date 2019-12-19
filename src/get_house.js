@@ -12,62 +12,6 @@ async function initHouseFun() {
 	let contract = await getContract(filePath, contractAddress);
 	return contract;
 }
-// initHouseFun().then(con => {
-// 	let addr = "0xaDCe9984d4d2E3936A0eB6F21a6105217a3E8766";	
-// 	let priKey = "0x36923250A8BF14292202A7932DA90A3222560E8FF3C0426FC6B6199F1EE29023";
-// 	let username = "zs";
-// 	let houseAddr = "It lies in SanFan, the beautiful city!";
-// 	let des = "It's very beautiful, and it has a lot of fun";
-// 	let info = "Greate info";
-// 	let hopeCtx = "Hope you are easygoing";
-// 	// releaseHouse(con, addr, priKey, houseAddr, 5, des, info, 12, 320000000000, hopeCtx).then(res => {
-// 	// 	if (res) {
-// 	// 		console.log(res);
-// 	// 	}
-// 	// });
-// 	// house id : 0x2a43eecd35d6b76aef7c08c9ab761ae366bd19018492fe8de12799ec342ac69f
-// 	let addr2 = "0x5b0ccb1c93064Eb8Fd695a60497240efd94A44ed";
-// 	let priKey2 = "0x502D29356356AE02B7E23ECC851CCA0F21FE9CDADEF1FBAB158EB82611F27229";
-
-// 	let houseId = "0x94efed96b0fa279522423d1a558ea49dfdc4c17186dadfe59657aa9d73f3f6ff";
-// 	let realRent = 320000000000;
-// 	// requestSign(con, addr2, priKey2, houseId, realRent).then(res => {
-// 	// 	if (res) {
-// 	// 		console.log(res);
-// 	// 	}
-// 	// });
-// 	let signHowLong = 12;
-// 	let rental = 320000000000;
-// 	let yearRent = signHowLong*rental;
-// 	let username2 = "ym";
-// 	// signAgreement(con, addr, priKey, houseId, username, signHowLong, rental, yearRent).then(res => {
-// 	// 	console.log(res)
-// 	// })
-// 	let addrChecker = "0x8E0f4A1f3C0DBEA0C73684B49aE4AD02789B3EC4";
-// 	let priKeyChecker = "0xFFE962244D80F95197089FE5FF87BE0163D485E7986A7070A498136012FD7B61";
-// 	let punishAmount = 5000000000;
-// 	let punishAddr = addr;
-// 	let reason = "Donnt observe the rule2";
-// 	// checkBreak(con, addrChecker, priKeyChecker, houseId, punishAmount, punishAddr).then(res => {
-// 	// 	console.log(res)
-// 	// });
-// 	// breakContract(con, addr2, priKey2, houseId, reason).then(res => {
-
-// 	// });
-// 	let amount = 2000000000;
-// 	// withdraw(con, addr2, priKey2, houseId, amount).then(res => {
-
-// 	// });
-// 	let ratingIndex = 3;
-// 	let remark = "It is very good.";
-// 	// const disRrkAddr = "0x16c0b9cb893BA4392131df01e70F831A07d02687";
-// 	commentHouse(con, addr2, priKey2, houseId, ratingIndex, remark).then(res => {
-
-// 	});
-// 	// getHouseRelaseInfo(con, houseId).then(res => {
-// 	// 	console.log(res)
-// 	// })
-// });
 
 function checkLogin(addr) {
 	// 必须先登录
@@ -120,7 +64,7 @@ function releaseHouse(db, contract, contractToken, addr, privateKey, houseAddr, 
 				                    	tx_hash = ctx.transactionHash;
 				                    	house_hash = logRes.houseHash;
 				                    	console.log("===house_hash==", logRes, house_hash)
-				                    	resolve({status:flag, data:{trans: ctx.transactionHash, houseId: logRes.houseHash}});
+				                    	resolve({status:true, data:{trans: ctx.transactionHash, houseId: logRes.houseHash}});
 				                    } else {
 				                    	resolve({status:false, err:"发布房源失败!"});
 				                    } 
@@ -155,44 +99,54 @@ function requestSign(db, contract, addr, privateKey, houseId, realRent) {
 		checkLogin(addr).then(flag => {
 			if (!flag) {
 				console.log("Please login in first");
-				resolve({status: false, err: "请先登录！"});
+				resolve({status: 203, err: "请先登录！"});
 			} else {
-				console.log("=request sign=", houseId, realRent);
-				const reqFun = contract.methods.requestSign(houseId, realRent);
-			    const reqABI = reqFun.encodeABI();
-			    console.log("Start request!", addr);
-			    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
-		        	if (receipt) {
-		        		console.log("Request the house success!");
-		        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'RequestSign');
-	                    if (flag) {
-	                    	console.log("request house receive: ", ctx)
-	                    	resolve({status:flag, data: ctx.transactionHash});
-	                    	let house_state = comVar.houseState.WaitRent;
-	                    	dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
-	                    } else {
-	                    	resolve({status:false, err:"请求签订房源失败!"});
-	                    } 
-		        	} else {
-		        		console.log("Release house fail!");
-		        		resolve({status:false, err:"请求签订房源失败!"});
-		        	}
-				}).catch(err => {
-					console.log("Release fail!", err);
-					reject({status: false, err: "请检查该房屋是否已经被预定，余额是否充足!"});
+				getHouseRelaseInfo(contract, houseId).then(info => {
+					console.log("get house release", info)
+					if (info && info.status) {
+						console.log("get====")
+						resolve({status: 204, err: "该房屋已被预定！"});
+						if (info.data) {
+							let state = parseInt(info.data[0]);
+						    dbFun.updateReleaseInfo(db, "", addr, houseId, state);
+						}
+					} else {
+						console.log("=request sign=", houseId, realRent);
+						const reqFun = contract.methods.requestSign(houseId, realRent);
+					    const reqABI = reqFun.encodeABI();
+					    console.log("Start request!", addr);
+					    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
+				        	if (receipt) {
+				        		console.log("Request the house success!");
+				        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'RequestSign');
+			                    if (flag) {
+			                    	console.log("request house receive: ", ctx)
+			                    	resolve({status:200, data: ctx.transactionHash});
+			                    	let house_state = comVar.houseState.WaitRent; 
+			                    	dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
+			                    } else {
+			                    	resolve({status:205, err:"网络异常，未获得链上数据!"});
+			                    } 
+				        	} else {
+				        		console.log("Release house fail!");
+				        		resolve({status:206, err:"请求签订房源失败!"});
+				        	}
+						}).catch(err => {
+							console.log("Release fail!", err);
+							reject({status: 207, err: "请检查该房屋是否已经被预定，账户余额是否充足!"});
+						});
+					}
 				});
-			}
-		});
-		
+			}			
+		});		
 	});
 }
 
 // function signAgreement(contract, addr, privateKey, houseId, name, signHowLong, rental, yearRent) {
-function signAgreement(db, contract, username, houseId, houseAddr, falsify, phoneNum, idCard, signHowLong, rental, houseDeadline, addr, privateKey) {	
+function signAgreement(db, contract, username, houseId, houseAddr, falsify, phoneNum, idCard, signHowLong, rental, houseDeadline, houseUse, addr, privateKey) {	
 	return new Promise((resolve, reject) => {
-		console.log("==start=signAgreement=")
-		let yearRent = 12*rental;
-		const reqFun = contract.methods.signAgreement(houseId, username, signHowLong, rental, yearRent);
+		console.log("==start=signAgreement=");
+		const reqFun = contract.methods.signAgreement(houseId, username, signHowLong, rental);
 	    const reqABI = reqFun.encodeABI();
 	    console.log("Start sign the agreement!", addr);
 	    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
@@ -200,10 +154,12 @@ function signAgreement(db, contract, username, houseId, houseAddr, falsify, phon
         		console.log("Sign success!");
         		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'SignContract');
                 if (flag) {
-                	console.log("request house receive: ", ctx)
-                	resolve({status:flag, data: ctx.transactionHash});
-                	let house_state = comVar.houseState.Renting;
+                	console.log("request house receive: ", ctx);
+                	let txHash = ctx.transactionHash;
+                	resolve({status:flag, data: txHash});
+                	let house_state = comVar.houseState.Renting;    	
 	                dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
+                	dbFun.insertAgreeRecord(db, username, phoneNum, addr, houseAddr, rental, signHowLong, txHash, houseId, falsify, houseDeadline, houseUse);
                 } else {
                 	resolve({status:false, err:"签订合同失败!"});
                 }
@@ -425,8 +381,13 @@ function getHouseBasic(contract, houseId) {
 
 function getHouseRelaseInfo(contract, houseId) {
 	return new Promise((resolve, reject) => {
-		contract.methods.getHouseBasicInfo(houseId).call().then(res => {
+		console.log("---get House Relase Info---",houseId)
+		contract.methods.getHouseReleaseInfo(houseId).call().then(res => {
 			console.log(res);
+			resolve({status: true, data: res});
+		}).catch(err => {
+			console.log("get house relase information err:", err);
+			reject({status: false, err: err});
 		});
 	});
 }
