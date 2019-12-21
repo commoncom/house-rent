@@ -293,6 +293,35 @@ function initialize() {
           });
       });
   });
+  // 获取甲方已签订的协议
+  app.get('/getagree/:houseid', (req, res) => {
+      console.log("-----release house params----", req.params)
+      setResHeadr(res);
+      houseManager.querySignInfo(conn, req.params.houseid).then(ctx => {
+          res.send(ctx);
+      }).catch(err => {
+          console.log("get agree error", err)
+          res.send({status: false, err: err});
+      });
+  });
+  app.get('/leasersign/:leaser_name/:idcard/:phonenum/:houseid/:renewal_month/:break_month/:addr/:prikey', (req, res) => {
+      console.log("-----leaser sign house params----", req.params);
+      setResHeadr(res);
+      contractHouse.then(con => {
+          console.log("sign agreement");
+          HouseFun.leaserSign(conn, con, params.leaser_name, params.houseid, params.phonenum, 
+              params.idcard, params.renewal_month, params.break_month, params.addr, params.prikey).then(ctx => {
+            res.send(ctx);
+          }).catch(err => {
+            res.send(err);
+          });
+      }).catch(err => {
+          res.send({
+            "status": false,
+            "err": err
+          });
+      });
+  });
   // 毁约
   app.get('/break/:houseid/:reason/:address/:prikey', (req, res) => {
       console.log("-----sign house params----", req.params);

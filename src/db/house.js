@@ -122,24 +122,25 @@ function insertAgreeRecord(conn, userName, phoneNum, addr, houseAddr, rental, te
 	});
 }
 // 查询房东签订信息
-function querySignInfo(conn, addr, houseId) {
-	console.log("-------querySignInfo--------", houseId, addr)
+function querySignInfo(conn, houseId) {
+	console.log("-------querySignInfo--------", houseId)
 	return new Promise((resolve, reject) => {
 		conn.then(con => {
 			let sql, criteria;
-			if (houseId == '0x') {
-				sql = "SELECT * FROM house_release_info WHERE `addr` = ?";
-				criteria = [addr];
+			if (!houseId || houseId == '0x') {
+				sql = "SELECT * FROM house_transaction_record";
+				criteria = [];
 			} else {
-				sql = "SELECT * FROM house_release_info WHERE `house_id` = ? and `addr` = ?";
-				criteria = [houseId, addr];
+				sql = "SELECT * FROM house_transaction_record WHERE `house_id` = ?";
+				criteria = [houseId];
 			} 
 			con.query(sql, criteria,  function (err, result, fields) {
 			    if (err) {
 			    	console.log(err);
 			    	resolve({status:false, err:err});
+			    } else {
+			    	resolve({status: true, data:result});
 			    }
-			    resolve({status: true, data: result});
 		    });
 		}).catch(err => {
 			console.log("----query-release--error---", err)

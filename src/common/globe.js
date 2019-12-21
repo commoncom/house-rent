@@ -18,7 +18,8 @@ const houseState = {
 	Renting: 2,
 	EndRent: 3,
 	Cance: 4,
-	BreakRent: 5
+	BreakRent: 5,
+	UnderContract: 6
 }
 module.exports = {
 	disAmount,
