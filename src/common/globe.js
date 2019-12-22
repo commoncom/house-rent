@@ -6,10 +6,11 @@ const regpri = "0x8C6817D77CFD962F6EAB191251B9720D3EB76221AE5A28379C9B3D03EC68EA
 
 // contract address
 const tokenConAddr = "0xfed21ab2993faa0e0b2ab92752428d96370d4889";
-const regConAddr = "0x563c7abd0b216adfea1e70e14ca016021179c976";
+const regConAddr = "0x5e0c84653fb7546002c9522b4adec22778ab8de4";
 const remarkConAddr = "0xb7fdf357abf21d7d6aa0e956c2a4ba38651025f9";
 const authConAddr= "0x0455633466ab2091171489c4c85103b530371bdb";
-const houseConAddr = "0xa22c86548dc8bdcc92e7273d68f01b12c6e03a90";
+const houseConAddr = "0x173d6c7bb9630882486bb123409d7456847e9326";
+const agreeConAddr = "0x3dec0f379d4ecba8908ac00d64183ca2c0814a01";
 
 const promiseAmount = 50;
 const houseState = {
@@ -32,6 +33,7 @@ module.exports = {
 	remarkConAddr,
 	authConAddr,
 	houseConAddr,
+	agreeConAddr,
 	promiseAmount,
 	houseState
 }

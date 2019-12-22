@@ -143,61 +143,61 @@ function requestSign(db, contract, addr, privateKey, houseId, realRent) {
 }
 
 // function signAgreement(contract, addr, privateKey, houseId, name, signHowLong, rental, yearRent) {
-function signAgreement(db, contract, username, houseId, houseAddr, falsify, phoneNum, idCard, signHowLong, rental, houseDeadline, houseUse, addr, privateKey) {	
-	return new Promise((resolve, reject) => {
-		console.log("==start=signAgreement=");
-		const reqFun = contract.methods.signAgreement(houseId, username, signHowLong, rental);
-	    const reqABI = reqFun.encodeABI();
-	    console.log("Start sign the agreement!", addr);
-	    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
-        	if (receipt) {
-        		console.log("Sign success!");
-        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'SignContract');
-                if (flag) {
-                	console.log("request house receive: ", ctx);
-                	let txHash = ctx.transactionHash;
-                	resolve({status:flag, data: txHash});
-                	let house_state = comVar.houseState.UnderContract;    	
-	                dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
-                	dbFun.insertAgreeRecord(db, username, phoneNum, addr, houseAddr, rental, signHowLong, txHash, houseId, falsify, houseDeadline, houseUse);
-                } else {
-                	resolve({status:false, err:"签订合同失败!"});
-                }
-        	} 
-		}).catch(err => {
-			console.log("Sign fail!", err);
-			reject({status: false, err: "请检查是否已经登录、余额能否满足租金要求、是否已预订该房屋！"});
-		});
-	});
-}
+// function signAgreement(db, contract, username, houseId, houseAddr, falsify, phoneNum, idCard, signHowLong, rental, houseDeadline, houseUse, addr, privateKey) {	
+// 	return new Promise((resolve, reject) => {
+// 		console.log("==start=signAgreement=");
+// 		const reqFun = contract.methods.signAgreement(houseId, username, signHowLong, rental);
+// 	    const reqABI = reqFun.encodeABI();
+// 	    console.log("Start sign the agreement!", addr);
+// 	    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
+//         	if (receipt) {
+//         		console.log("Sign success!");
+//         		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'SignContract');
+//                 if (flag) {
+//                 	console.log("request house receive: ", ctx);
+//                 	let txHash = ctx.transactionHash;
+//                 	resolve({status:flag, data: txHash});
+//                 	let house_state = comVar.houseState.UnderContract;    	
+// 	                dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
+//                 	dbFun.insertAgreeRecord(db, username, phoneNum, addr, houseAddr, rental, signHowLong, txHash, houseId, falsify, houseDeadline, houseUse);
+//                 } else {
+//                 	resolve({status:false, err:"签订合同失败!"});
+//                 }
+//         	} 
+// 		}).catch(err => {
+// 			console.log("Sign fail!", err);
+// 			reject({status: false, err: "请检查是否已经登录、余额能否满足租金要求、是否已预订该房屋！"});
+// 		});
+// 	});
+// }
 
-function leaserSign(db, contract, leaserName, houseId, phoneNum, idCard, renewalMonth, breakMonth, addr, privateKey) {	
-	return new Promise((resolve, reject) => {
-		console.log("==start=leaser sign the contract=");
-		let signHowLong = 12, rental = 3200;
-		const reqFun = contract.methods.signAgreement(houseId, username, signHowLong, rental);
-	    const reqABI = reqFun.encodeABI();
-	    console.log("Start sign the agreement!", addr);
-	    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
-        	if (receipt) {
-        		console.log("Sign success!");
-        		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'SignContract');
-                if (flag) {
-                	console.log("request house receive: ", ctx);
-                	let txHash = ctx.transactionHash;
-                	resolve({status:flag, data: txHash});
-                	let house_state = comVar.houseState.Renting;  
-                	dbFun.updateAgreeRecord(db, phoneNum, addr, renewalMonth, breakMonth);
-                } else {
-                	resolve({status:false, err:"签订合同失败!"});
-                }
-        	} 
-		}).catch(err => {
-			console.log("Sign fail!", err);
-			reject({status: false, err: "请检查是否已经登录、余额能否满足租金要求、是否已预订该房屋！"});
-		});
-	});
-}
+// function leaserSign(db, contract, leaserName, houseId, phoneNum, idCard, renewalMonth, breakMonth, addr, privateKey) {	
+// 	return new Promise((resolve, reject) => {
+// 		console.log("==start=leaser sign the contract=");
+// 		let signHowLong = 12, rental = 3200;
+// 		const reqFun = contract.methods.signAgreement(houseId, username, signHowLong, rental);
+// 	    const reqABI = reqFun.encodeABI();
+// 	    console.log("Start sign the agreement!", addr);
+// 	    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
+//         	if (receipt) {
+//         		console.log("Sign success!");
+//         		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'SignContract');
+//                 if (flag) {
+//                 	console.log("request house receive: ", ctx);
+//                 	let txHash = ctx.transactionHash;
+//                 	resolve({status:flag, data: txHash});
+//                 	let house_state = comVar.houseState.Renting;  
+//                 	dbFun.updateAgreeRecord(db, phoneNum, addr, renewalMonth, breakMonth);
+//                 } else {
+//                 	resolve({status:false, err:"签订合同失败!"});
+//                 }
+//         	} 
+// 		}).catch(err => {
+// 			console.log("Sign fail!", err);
+// 			reject({status: false, err: "请检查是否已经登录、余额能否满足租金要求、是否已预订该房屋！"});
+// 		});
+// 	});
+// }
 
 function withdraw(contract, addr, privateKey, houseId, amount) {
 	return new Promise((resolve, reject) => {
@@ -423,7 +423,6 @@ module.exports = {
 	initHouseFun,
 	releaseHouse,
 	requestSign,
-	signAgreement,
 	withdraw,
 	breakContract,
 	checkBreak,

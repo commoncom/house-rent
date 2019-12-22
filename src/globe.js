@@ -6,12 +6,14 @@ let TokenFun = require("./get_token.js");
 let HouseFun = require("./get_house.js");
 let RemarkFun = require("./get_remark.js");
 let AuthFun = require("./get_auth.js");
+let AgreeFun = require("./get_agree.js");
 let comCos = require("./common/globe.js");
 
 // db opt
 let addrManager = require("./db/addr.js");
 let houseManager = require("./db/house.js");
 let authManager = require("./db/auth.js");
+let agreeManager = require("./db/agree.js");
 
 let configuration = initParam.configuration;
 let regLists = new Map();
@@ -25,6 +27,7 @@ function initialize() {
   let contractHouse = HouseFun.initHouseFun();
   let contractRemark = RemarkFun.initRemark();
   let contractAuth = AuthFun.initAuth();
+  let contractAgree = AgreeFun.initAgreeFun();
   let conn = initParam.connDb();
   console.log("----Init-----")
   // 
@@ -68,7 +71,7 @@ function initialize() {
     setResHeadr(res);
     contractReg.then(con => {
         console.log("reg contract");
-          RegisterFun.createUser(con, req.params.address,req.params.username, req.params.userId, req.params.pwd, req.params.cardId).then(ctx => {
+          RegisterFun.createUser(conn, con, req.params.address,req.params.username, req.params.userId, req.params.pwd, req.params.cardId).then(ctx => {
             console.log(ctx)
             res.send(ctx);
           }).catch(err => {
@@ -274,14 +277,14 @@ function initialize() {
   });
   // 签订合同
   // app.get('/sign/:address/:prikey/:name/:signlong/:rental/:yearrent', (req, res) => {
-  app.get('/sign/:username/:idcard/:phonenum/:rental/:tenacy/:houseid/:houseaddr/:falsify/:housedeadline/:houseuse/:addr/:prikey', (req, res) => {
+  app.get('/sign/:username/:idcard/:phonenum/:rental/:tenacy/:houseid/:houseaddr/:falsify/:housedeadline/:houseuse:/payone/:addr/:prikey', (req, res) => {
       console.log("-----sign house params----", req.params);
       setResHeadr(res);
       let params = req.params;
-      contractHouse.then(con => {
+      contractAgree.then(con => {
           console.log("sign agreement");
-          HouseFun.signAgreement(conn, con, params.username, params.houseid, params.houseaddr, params.falsify, params.phonenum, params.idcard,
-           params.tenacy, params.rental, params.housedeadline, params.houseuse, params.addr, params.prikey).then(ctx => {
+          AgreeFun.signAgreement(conn, con, params.username, params.houseid, params.houseaddr, params.falsify, params.phonenum, params.idcard,
+           params.tenacy, params.rental, params.housedeadline, params.houseuse, params.payone, params.addr, params.prikey).then(ctx => {
             res.send(ctx);
           }).catch(err => {
             res.send(err);
@@ -297,7 +300,7 @@ function initialize() {
   app.get('/getagree/:houseid', (req, res) => {
       console.log("-----release house params----", req.params)
       setResHeadr(res);
-      houseManager.querySignInfo(conn, req.params.houseid).then(ctx => {
+      agreeManager.querySignInfo(conn, req.params.houseid).then(ctx => {
           res.send(ctx);
       }).catch(err => {
           console.log("get agree error", err)
@@ -307,9 +310,9 @@ function initialize() {
   app.get('/leasersign/:leaser_name/:idcard/:phonenum/:houseid/:renewal_month/:break_month/:addr/:prikey', (req, res) => {
       console.log("-----leaser sign house params----", req.params);
       setResHeadr(res);
-      contractHouse.then(con => {
+      contractAgree.then(con => {
           console.log("sign agreement");
-          HouseFun.leaserSign(conn, con, params.leaser_name, params.houseid, params.phonenum, 
+          AgreeFun.leaserSign(conn, con, params.leaser_name, params.houseid, params.phonenum, 
               params.idcard, params.renewal_month, params.break_month, params.addr, params.prikey).then(ctx => {
             res.send(ctx);
           }).catch(err => {

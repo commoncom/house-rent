@@ -185,6 +185,25 @@
 		"constant": false,
 		"inputs": [
 			{
+				"name": "_houseId",
+				"type": "bytes32"
+			}
+		],
+		"name": "houseExist",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
 				"name": "_houseAddr",
 				"type": "string"
 			},
@@ -257,10 +276,52 @@
 			{
 				"name": "_houseId",
 				"type": "bytes32"
+			}
+		],
+		"name": "setHouseState",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_houseId",
+				"type": "bytes32"
+			}
+		],
+		"name": "setSign",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_houseId",
+				"type": "bytes32"
 			},
 			{
-				"name": "_name",
-				"type": "string"
+				"name": "_landlord",
+				"type": "address"
+			},
+			{
+				"name": "_leaserAddr",
+				"type": "address"
 			},
 			{
 				"name": "_signHowLong",
@@ -275,7 +336,30 @@
 		"outputs": [
 			{
 				"name": "",
-				"type": "uint8"
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_addr",
+				"type": "address"
+			},
+			{
+				"name": "_flag",
+				"type": "bool"
+			}
+		],
+		"name": "updateAuditor",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"payable": false,
@@ -422,13 +506,18 @@
 		"inputs": [
 			{
 				"indexed": true,
-				"name": "_sender",
+				"name": "sender",
 				"type": "address"
 			},
 			{
 				"indexed": false,
 				"name": "_houseId",
 				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"name": "_landlord",
+				"type": "address"
 			},
 			{
 				"indexed": false,
@@ -442,12 +531,7 @@
 			},
 			{
 				"indexed": false,
-				"name": "_signatrue",
-				"type": "bytes32"
-			},
-			{
-				"indexed": false,
-				"name": "_time",
+				"name": "nowTime",
 				"type": "uint256"
 			}
 		],
@@ -638,6 +722,20 @@
 			{
 				"name": "",
 				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "isExist",
+		"outputs": [
+			{
+				"name": "isIndeed",
+				"type": "bool"
 			}
 		],
 		"payable": false,

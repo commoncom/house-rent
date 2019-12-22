@@ -40,7 +40,7 @@ function isAlreayReg(contract, addr, username) {
 }
 
 // 免费注册链上用户
-function createUser(contract, addr, username, userId, pwd, cardId) {
+function createUser(db, contract, addr, username, userId, pwd, cardId) {
     return new Promise((resolve, reject) => {
     	console.log("create user", addr);
     	isAlreayReg(contract, addr, username).then(res => {
