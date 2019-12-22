@@ -69,8 +69,8 @@ function updateAgreeRecord(conn, houseId, leaserName, leaserId, renewalMonth, br
 		conn.then(con => {
 			let state = 1; // 合同状态为：已签订
 			let agreeCopies = 2; // 合同份数
-			let sql = "UPDATE `house_transaction_record` SET `leaser_id` = ?, `leaser_addr` = ?, `house_use` = ?, `state` = ?, `renewal_before_month` = ?, `notice_break_month` = ?,`agree_copies` = ?, `lease_sign_time` = ?, `updatetime` = ? WHERE `addr` = ?";
-			let condition = [leaserId, leaserAddr, houseUse, state, renewalMonth, breakMonth, agreeCopies, Date.now(), Date.now(), addr];
+			let sql = "UPDATE `house_transaction_record` SET `leaser_id` = ?, `leaser_addr` = ?, `state` = ?, `renewal_before_month` = ?, `notice_break_month` = ?,`agree_copies` = ?, `lease_sign_time` = ?, `updatetime` = ? WHERE `addr` = ?";
+			let condition = [leaserId, leaserAddr, state, renewalMonth, breakMonth, agreeCopies, Date.now(), Date.now(), addr];
 			con.query(sql, condition, function(err, result, fileds){
 				console.log("---update ---", result);
 			});
@@ -88,8 +88,33 @@ function updateAgreeRecord(conn, houseId, leaserName, leaserId, renewalMonth, br
 	});
 }
 
+// 更新签订合同信息
+function updateAgreeState(conn, houseId, state) {
+	console.log("-------update Agree Record--state-------", houseId, state);
+	return new Promise((resolve, reject) => {
+		conn.then(con => {
+			let sql = "UPDATE `house_transaction_record` SET `state` = ?, `updatetime` = ? WHERE `house_id` = ?";
+			let condition = [state, Date.now(), houseId];
+			con.query(sql, condition, function(err, result, fileds){
+				console.log("---update ---", result);
+			});
+			con.query("SELECT * FROM house_transaction_record WHERE house_id = ? ", [houseId],  function (err, result, fields) {
+			    if (err) {
+			    	console.log("Query agreement record after update info" ,err);
+			    	reject(err);
+			    }
+			    resolve({status: true, err: result});
+		    });
+		}).catch(err => {
+			console.log("----query-agreement record--error---" ,err)
+			reject(err);
+		});
+	});
+}
+
 module.exports = {
 	insertAgreeRecord,
 	updateAgreeRecord,
+	updateAgreeState,
 	querySignInfo
 }

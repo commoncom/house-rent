@@ -103,11 +103,12 @@ function requestSign(db, contract, addr, privateKey, houseId, realRent) {
 			} else {
 				getHouseRelaseInfo(contract, houseId).then(info => {
 					console.log("get house release", info)
-					if (info && info.status) {
+					if (info && info.status && info.data && parseInt(info.data[0]) != 0) {
 						console.log("get====")
 						resolve({status: 204, err: "该房屋已被预定！"});
 						if (info.data) {
 							let state = parseInt(info.data[0]);
+							console.log("house state", state);
 						    dbFun.updateReleaseInfo(db, "", addr, houseId, state);
 						}
 					} else {

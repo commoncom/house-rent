@@ -277,7 +277,7 @@ function initialize() {
   });
   // 签订合同
   // app.get('/sign/:address/:prikey/:name/:signlong/:rental/:yearrent', (req, res) => {
-  app.get('/sign/:username/:idcard/:phonenum/:rental/:tenacy/:houseid/:houseaddr/:falsify/:housedeadline/:houseuse:/payone/:addr/:prikey', (req, res) => {
+  app.get('/sign/:username/:idcard/:phonenum/:rental/:tenacy/:houseid/:houseaddr/:falsify/:housedeadline/:houseuse/:payone/:addr/:prikey', (req, res) => {
       console.log("-----sign house params----", req.params);
       setResHeadr(res);
       let params = req.params;
@@ -311,14 +311,16 @@ function initialize() {
       console.log("-----leaser sign house params----", req.params);
       setResHeadr(res);
       contractAgree.then(con => {
-          console.log("sign agreement");
-          AgreeFun.leaserSign(conn, con, params.leaser_name, params.houseid, params.phonenum, 
+          console.log("sign agreement"); // db, contract, leaserName, houseId, phoneNum, idCard, renewalMonth, breakMonth, addr, privateKey
+          let params = req.params;
+          AgreeFun.leaserSign(conn, con, contractHouse, params.leaser_name, params.houseid, params.phonenum, 
               params.idcard, params.renewal_month, params.break_month, params.addr, params.prikey).then(ctx => {
             res.send(ctx);
           }).catch(err => {
             res.send(err);
           });
       }).catch(err => {
+          console.log("==err=", err);
           res.send({
             "status": false,
             "err": err
