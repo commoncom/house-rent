@@ -59,6 +59,7 @@ function leaserSign(db, contract, contractHouse, leaserName, houseId, phoneNum, 
 			HouseFun.getHouseRelaseInfo(con, houseId).then(info => {
 			if (info && info.status && info.data && parseInt(info.data[0]) != 1) {
 				resolve({status:false, err:"合同已完成签订!"});
+				dbHouseFun.updateReleaseInfo(db, "", addr, houseId, comVar.houseState.Renting);
 				dbFun.updateAgreeState(db, houseId, parseInt(info.data[0])); // 乙方已签订合同，合同正式生效 
 			} else {
 				console.log("==start=leaser sign the contract=");
@@ -91,6 +92,33 @@ function leaserSign(db, contract, contractHouse, leaserName, houseId, phoneNum, 
 	});
 }
 
+function endRent(db, contract, houseId, addr, privateKey) {	
+	return new Promise((resolve, reject) => {
+		console.log("==start=leaser sign the contract=");
+		const reqFun = contract.methods.endRent(houseId);
+	    const reqABI = reqFun.encodeABI();
+	    console.log("Start sign the agreement!", addr);
+	    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
+	    	if (receipt) {
+	    		console.log("Leaser sign success!");
+	    		let [flag, ctx, logRes] = decodeLog(contract, receipt, 'LeaserSign');
+	            if (flag) {
+	            	console.log("request house receive: ", ctx);
+	            	let txHash = ctx.transactionHash;
+	            	resolve({status:flag, data: txHash});
+	            	let house_state = comVar.houseState.EndRent; 
+	            	dbHouseFun.updateReleaseInfo(db, "", addr, houseId, house_state);
+	            	dbFun.updateAgreeState(db, houseId, 3); // 租赁到期
+	            } else {
+	            	resolve({status:false, err:"结束租赁失败!"});
+	            }
+	    	} 
+		}).catch(err => {
+			console.log("Sign fail!", err);
+			reject({status: false, err: "请检查该房屋租赁是否到期！"});
+		});		
+	});
+}
 
 
 function decodeLog(contract, receipt, eventName) {
@@ -156,5 +184,6 @@ function packSendMsg(formAddr, privateKey, toAddr, createABI) {
 module.exports = {
 	initAgreeFun,
 	signAgreement,
-	leaserSign
+	leaserSign,
+	endRent
 }

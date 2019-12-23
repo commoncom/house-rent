@@ -327,6 +327,26 @@ function initialize() {
           });
       });
   });
+  // 完成租赁
+  app.get('/complete/:houseid/:addr/:prikey', (req, res) => {
+      console.log("-----leaser sign house params----", req.params);
+      setResHeadr(res);
+      contractAgree.then(con => {
+          console.log("sign agreement"); // db, contract, leaserName, houseId, phoneNum, idCard, renewalMonth, breakMonth, addr, privateKey
+          let params = req.params;
+          AgreeFun.endRent(conn, con, params.houseid, params.addr, params.prikey).then(ctx => {
+            res.send(ctx);
+          }).catch(err => {
+            res.send(err);
+          });
+      }).catch(err => {
+          console.log("=endRent=err=", err);
+          res.send({
+            "status": false,
+            "err": err
+          });
+      });
+  });
   // 毁约
   app.get('/break/:houseid/:reason/:address/:prikey', (req, res) => {
       console.log("-----sign house params----", req.params);
