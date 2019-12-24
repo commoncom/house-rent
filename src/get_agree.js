@@ -18,10 +18,11 @@ async function initAgreeFun() {
 // function signAgreement(contract, addr, privateKey, houseId, name, signHowLong, rental, yearRent) {
 function signAgreement(db, contract, username, houseId, houseAddr, falsify, phoneNum, idCard, signHowLong, rental, houseDeadline, houseUse, payOne, addr, privateKey) {	
 	return new Promise((resolve, reject) => {
-		console.log("==start=signAgreement=", contract.methods);
+		console.log("==start=signAgreement=", contract.methods.newAgreement);
 		// 先查询是否已经签约
 		dbFun.querySignInfo(db, houseId).then(result => {
-			if (result && result.length != 0) {
+			console.log("quer resl", result, result)
+			if (result && result.status && result.data.length != 0) {
 				resolve({status:false, err:"已签订该房屋合同!"});
 			} else {
 				const reqFun = contract.methods.newAgreement(username, idCard, phoneNum, rental, signHowLong, houseId, houseAddr, falsify, houseDeadline, payOne, houseUse);
@@ -76,7 +77,7 @@ function leaserSign(db, contract, contractHouse, leaserName, houseId, phoneNum, 
 			            	resolve({status:flag, data: txHash});
 			            	let house_state = comVar.houseState.Renting; 
 			            	dbHouseFun.updateReleaseInfo(db, "", addr, houseId, house_state);
-			            	dbFun.updateAgreeState(db, houseId, 1); // 乙方已签订合同，合同正式生效 
+			            	dbFun.updateAgreeRecord(db, houseId, leaserName, phoneNum, renewalMonth, breakMonth, addr);
 			            } else {
 			            	resolve({status:false, err:"签订合同失败!"});
 			            }

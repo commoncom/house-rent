@@ -1,6 +1,21 @@
 let HouseFun = require("./get_house.js");
+let RegisterFun = require("./get_register.js");
 let web3 = require("./common/contract_com.js").web3;
-HouseFun.initHouseFun().then(con => {
+
+testRegister()
+
+function testRegister() {
+	RegisterFun.initReg().then(con => {
+		let addr = "0x12bb671c44c2593efaae0108d4db4b838792c3cc";
+		let name = "forget2019";
+		RegisterFun.isAlreayReg(con, addr, name).then(res => {
+			console.log(res)
+		})
+	});
+}
+
+function testHouse() {
+	HouseFun.initHouseFun().then(con => {
 	let addr = "0xaDCe9984d4d2E3936A0eB6F21a6105217a3E8766";	
 	let priKey = "0x36923250A8BF14292202A7932DA90A3222560E8FF3C0426FC6B6199F1EE29023";
 	let username = "zs";
@@ -53,15 +68,16 @@ HouseFun.initHouseFun().then(con => {
 
 	// });
 	let houseId3 = "0x6eff8e3db86afe6dbcde6c10b81fbce7b7d6b88e77516d1ba644816a21e76868";
-	let houseId2 = "0x6eff8e3db86afe6dbcde6c10b81fbce7b7d6b88e77516d1ba644816a21e76868";
+	let houseId2 = "0x81800316020f90b6b421cdd4ed1cba7310b271c1c913f2de6e10d7b96dad65c8";
 	HouseFun.getHouseRelaseInfo(con, houseId3).then(res => {
 		console.log(res, res.data[0], 1111)
-	})
+	});
 	// let formAddr = "0xb173a99bf933a4b6b13cf5532efd75b894fba55d"
 	// web3.eth.getTransactionCount(formAddr, 'pending').then(nonce => {
 	// 	console.log(nonce)
 	// });
 	// HouseFun.getHouseBasic(con, houseId3).then(res => {
-		// console.log(res)
+	// 	console.log(res)
 	// })
 });
+}
