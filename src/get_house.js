@@ -4,10 +4,10 @@ let web3 = require("./common/contract_com.js").web3;
 let Web3EthAbi = require('web3-eth-abi');
 let comVar = require("./common/globe.js");
 let dbFun = require("./db/house.js");
+let dbAgreeFun = require("./db/agree.js");
 let nonceMap = new Map();
 let RegisterFun = require("./get_register");
 let TokenFun = require("./get_token");
-let AgreeFun = require("./get_agree");
 let contractAddress = comVar.houseConAddr;
 async function initHouseFun() {
   let contract = await getContract(filePath, contractAddress);
@@ -169,53 +169,61 @@ function withdraw(contract, addr, privateKey, houseId, amount) {
 
 function breakContract(db, contract, addr, privateKey, houseId, reason) {
   return new Promise((resolve, reject) => {
-    checkLogin(addr).then(flag => {
-      if (!flag) {
-        console.log("Please login in first");
-        resolve({status:203, err: "请先登录！"});
-      } else {
-          const reqFun = contract.methods.breakContract(houseId, reason);
-          const reqABI = reqFun.encodeABI();
-          console.log("Start Break the contract!", addr);
-          packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
-              if (receipt) {
-                web3.eth.getTransactionReceipt(receipt.transactionHash).then(transaction => {
-                    console.log("getTransactionReceipt", transaction);
-                    if (transaction.status) {
-                       console.log("Break Contract success!");
-                    } else {
-                      resolve({status:204, err: "获取不到链上收据"});
-                      return;
-                    }
-                });
-                let [flag, ctx, logRes] = decodeLog(contract, receipt, 'BreakContract');
-                    if (flag) {
-                      console.log("Break the contract receive: ", ctx)
-                      resolve({status:200, data: ctx.transactionHash});
-                      let house_state = comVar.houseState.BreakRent; 
-                      dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
-                      dbFun.updateAgreeState(db, houseId, 5); // 毁约
-                    } else {
-                      resolve({status:205, err:"毁约失败!"});
-                    }
-              }
-        }).catch(err => {
-          console.log("Break the contract occure error!, Please inspect whether already pass the admin check!");
-          reject({stats: 206, err: "请检查是否已经通过管理员审核！"});
+        checkLogin(addr).then(flag => {
+          if (!flag) {
+              console.log("Please login in first");
+              resolve({status:203, err: "请先登录！"});
+          } else {
+              getHouseRelaseInfo(contract, houseId).then(info => {
+                if (info && info.status && info.data && parseInt(info.data[0]) != 1) {
+                    resolve({status:207, err:"已申请毁约!"});
+                    dbFun.updateReleaseInfo(db, "", addr, houseId, parseInt(info.data[0]));
+                    dbAgreeFun.updateAgreeState(db, houseId, parseInt(info.data[0])); // 乙方已签订合同，合同正式生效 
+                } else {
+                  const reqFun = contract.methods.breakContract(houseId, reason);
+                  const reqABI = reqFun.encodeABI();
+                  console.log("Start Break the contract!", addr);
+                  packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
+                      if (receipt) {
+                          web3.eth.getTransactionReceipt(receipt.transactionHash).then(transaction => {
+                              console.log("getTransactionReceipt", transaction);
+                              if (transaction.status) {
+                                 console.log("Break Contract success!");
+                              } else {
+                                resolve({status:204, err: "获取不到链上收据"});
+                                return;
+                              }
+                          });
+                          let [flag, ctx, logRes] = decodeLog(contract, receipt, 'BreakContract');
+                          if (flag) {
+                            console.log("Break the contract receive: ", ctx)
+                            resolve({status:200, data: ctx.transactionHash});
+                            let house_state = comVar.houseState.BreakRent; 
+                            dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
+                            dbAgreeFun.updateAgreeState(db, houseId, comVar.agreeState.BreakRent); // 毁约
+                          } else {
+                            resolve({status:205, err:"毁约失败!"});
+                          }
+                      }
+                  }).catch(err => {
+                     console.log("Break the contract occure error!", err);
+                     reject({stats: 206, err: "请检查该房屋是否已经毁约！"});
+                  });         
+                }
+              });
+          }
         });
-      }
-    });
   });
 }
 
-function checkBreak(contract, addr, privateKey, houseId, punishAmount, punishAddr) {
+function checkBreak(db, contract, addr, privateKey, houseId, punishAmount, punishAddr) {
   return new Promise((resolve, reject) => {
     checkLogin(addr).then(flag => {
       if (!flag) {
         console.log("Please login in first");
         resolve(false);
       } else {
-        const reqFun = contract.methods.checkBreak(houseId, punishAmount, punishAddr);
+          const reqFun = contract.methods.checkBreak(houseId, punishAmount, punishAddr);
           const reqABI = reqFun.encodeABI();
           console.log("Start Check Break the contract!", addr);
           packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
@@ -225,6 +233,9 @@ function checkBreak(contract, addr, privateKey, houseId, punishAmount, punishAdd
                     if (flag) {
                       console.log("Check Break the contract receive: ", ctx)
                       resolve({status:flag, data: ctx.transactionHash});
+                      let house_state = comVar.houseState.BreakRent; 
+                      dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
+                      dbAgreeFun.updateAgreeState(db, houseId, comVar.agreeState.AlreadyBreak);
                     } else {
                       resolve({status:false, err:"审核交易审核失败!"});
                     }

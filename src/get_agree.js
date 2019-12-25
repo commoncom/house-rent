@@ -54,17 +54,19 @@ function signAgreement(db, contract, username, houseId, houseAddr, falsify, phon
 	});
 }
 
-function leaserSign(db, contract, contractHouse, leaserName, houseId, phoneNum, idCard, renewalMonth, breakMonth, addr, privateKey) {	
+function leaserSign(db, contract, contractHouse, leaserName, houseId, phoneNum, idCard, renewalMonth, breakMonth, tenancy, addr, privateKey) {	
 	return new Promise((resolve, reject) => {
 		contractHouse.then(con => {
 			HouseFun.getHouseRelaseInfo(con, houseId).then(info => {
 			if (info && info.status && info.data && parseInt(info.data[0]) != 1) {
 				resolve({status:false, err:"合同已完成签订!"});
-				dbHouseFun.updateReleaseInfo(db, "", addr, houseId, comVar.houseState.Renting);
+				dbHouseFun.updateReleaseInfo(db, "", addr, houseId, parseInt(info.data[0]));
 				dbFun.updateAgreeState(db, houseId, parseInt(info.data[0])); // 乙方已签订合同，合同正式生效 
 			} else {
+				let startTime = Date.now();
+		    	let endTime = (startTime/1000 + tenancy*30*24*3600)*1000;
 				console.log("==start=leaser sign the contract=");
-				const reqFun = contract.methods.tenantSign(houseId, leaserName, phoneNum, idCard, renewalMonth, breakMonth);
+				const reqFun = contract.methods.tenantSign(houseId, leaserName, phoneNum, idCard, renewalMonth, breakMonth, startTime, endTime);
 			    const reqABI = reqFun.encodeABI();
 			    console.log("Start sign the agreement!", addr);
 			    packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
@@ -77,7 +79,7 @@ function leaserSign(db, contract, contractHouse, leaserName, houseId, phoneNum, 
 			            	resolve({status:flag, data: txHash});
 			            	let house_state = comVar.houseState.Renting; 
 			            	dbHouseFun.updateReleaseInfo(db, "", addr, houseId, house_state);
-			            	dbFun.updateAgreeRecord(db, houseId, leaserName, phoneNum, renewalMonth, breakMonth, addr);
+			            	dbFun.updateAgreeRecord(db, houseId, leaserName, phoneNum, renewalMonth, breakMonth, addr, startTime, endTime);
 			            } else {
 			            	resolve({status:false, err:"签订合同失败!"});
 			            }
@@ -109,7 +111,7 @@ function endRent(db, contract, houseId, addr, privateKey) {
 	            	resolve({status:flag, data: txHash});
 	            	let house_state = comVar.houseState.EndRent; 
 	            	dbHouseFun.updateReleaseInfo(db, "", addr, houseId, house_state);
-	            	dbFun.updateAgreeState(db, houseId, 3); // 租赁到期
+	            	dbFun.updateAgreeState(db, houseId, comVar.agreeState.EndRent); // 租赁到期
 	            } else {
 	            	resolve({status:false, err:"结束租赁失败!"});
 	            }

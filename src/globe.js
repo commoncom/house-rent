@@ -307,14 +307,14 @@ function initialize() {
           res.send({status: false, err: err});
       });
   });
-  app.get('/leasersign/:leaser_name/:idcard/:phonenum/:houseid/:renewal_month/:break_month/:addr/:prikey', (req, res) => {
+  app.get('/leasersign/:leaser_name/:idcard/:phonenum/:houseid/:renewal_month/:break_month/:tenancy/:addr/:prikey', (req, res) => {
       console.log("-----leaser sign house params----", req.params);
       setResHeadr(res);
       contractAgree.then(con => {
           console.log("sign agreement"); // db, contract, leaserName, houseId, phoneNum, idCard, renewalMonth, breakMonth, addr, privateKey
           let params = req.params;
           AgreeFun.leaserSign(conn, con, contractHouse, params.leaser_name, params.houseid, params.phonenum, 
-              params.idcard, params.renewal_month, params.break_month, params.addr, params.prikey).then(ctx => {
+              params.idcard, params.renewal_month, params.break_month, params.tenancy,params.addr, params.prikey).then(ctx => {
             res.send(ctx);
           }).catch(err => {
             res.send(err);
@@ -352,11 +352,11 @@ function initialize() {
       console.log("-----sign house params----", req.params);
       setResHeadr(res);
       contractHouse.then(con => {
-          HouseFun.breakContract(con, req.params.address, req.params.prikey, req.params.houseid, req.params.reason).then(ctx => {
+          HouseFun.breakContract(conn, con, req.params.address, req.params.prikey, req.params.houseid, req.params.reason).then(ctx => {
              res.send(ctx);
           }).catch(err => {
             res.send({
-              "status": false,
+              "status": 201,
               "err": err
             });
           });
@@ -365,7 +365,7 @@ function initialize() {
   // 审查毁约
   app.get('/checkbreak/:address/:prikey/:houseid/:punishamount/:punishaddr', (req, res) => {
       console.log("-----check break agreement params----", req.params)
-      HouseFun.checkBreak(contractHouse, req.params.address, req.params.prikey, req.params.houseid, req.params.punishamount, req.params.punishaddr).then(ctx => {
+      HouseFun.checkBreak(conn, contractHouse, req.params.address, req.params.prikey, req.params.houseid, req.params.punishamount, req.params.punishaddr).then(ctx => {
         res.send(ctx);
      }).catch(err => {
         res.send({
