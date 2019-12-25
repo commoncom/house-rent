@@ -363,15 +363,18 @@ function initialize() {
       });
   });
   // 审查毁约
-  app.get('/checkbreak/:address/:prikey/:houseid/:punishamount/:punishaddr', (req, res) => {
+  app.get('/checkbreak/:houseid/:punishaddr/:punishamount/:address/:prikey', (req, res) => {
       console.log("-----check break agreement params----", req.params)
-      HouseFun.checkBreak(conn, contractHouse, req.params.address, req.params.prikey, req.params.houseid, req.params.punishamount, req.params.punishaddr).then(ctx => {
-        res.send(ctx);
-     }).catch(err => {
-        res.send({
-          "status": false,
-          "err": err
-        });
+      setResHeadr(res);
+      contractHouse.then(con => {
+          HouseFun.checkBreak(conn, con, req.params.houseid, req.params.punishamount, req.params.punishaddr, req.params.address, req.params.prikey).then(ctx => {
+            res.send(ctx);
+          }).catch(err => {
+            res.send({
+              "status": false,
+              "err": err
+            });
+          });
       });
   });
   // 退币

@@ -216,38 +216,29 @@ function breakContract(db, contract, addr, privateKey, houseId, reason) {
   });
 }
 
-function checkBreak(db, contract, addr, privateKey, houseId, punishAmount, punishAddr) {
+function checkBreak(db, contract, houseId, punishAmount, punishAddr, addr, privateKey) {
   return new Promise((resolve, reject) => {
-    checkLogin(addr).then(flag => {
-      if (!flag) {
-        console.log("Please login in first");
-        resolve(false);
-      } else {
-          const reqFun = contract.methods.checkBreak(houseId, punishAmount, punishAddr);
-          const reqABI = reqFun.encodeABI();
-          console.log("Start Check Break the contract!", addr);
-          packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
-              if (receipt) {
-                console.log("Check Break Contract success!");
-                let [flag, ctx, logRes] = decodeLog(contract, receipt, 'ApprovalBreak');
-                    if (flag) {
-                      console.log("Check Break the contract receive: ", ctx)
-                      resolve({status:flag, data: ctx.transactionHash});
-                      let house_state = comVar.houseState.BreakRent; 
-                      dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
-                      dbAgreeFun.updateAgreeState(db, houseId, comVar.agreeState.AlreadyBreak);
-                    } else {
-                      resolve({status:false, err:"审核交易审核失败!"});
-                    }
-              } 
-        }).catch(err => {
-          console.log("Check Break the contract occure error!", err);
-          reject({status: false, err: err});
-        });
-      }
-    }).catch(err => {
-      reject({status: false, err: err});
-    });
+      const reqFun = contract.methods.checkBreak(houseId, punishAmount, punishAddr);
+      const reqABI = reqFun.encodeABI();
+      console.log("Start Check Break the contract!", addr);
+      packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
+          if (receipt) {
+            console.log("Check Break Contract success!");
+            let [flag, ctx, logRes] = decodeLog(contract, receipt, 'ApprovalBreak');
+                if (flag) {
+                  console.log("Check Break the contract receive: ", ctx)
+                  resolve({status:flag, data: ctx.transactionHash});
+                  let house_state = comVar.houseState.AlreadyBreak; 
+                  dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
+                  dbAgreeFun.updateAgreeState(db, houseId, comVar.agreeState.AlreadyBreak);
+                } else {
+                  resolve({status:false, err:"审核失败!"});
+                }
+          } 
+      }).catch(err => {
+        console.log("Check Break the contract occure error!", err);
+         reject({status: false, err: err});
+      });
   });
 }
 

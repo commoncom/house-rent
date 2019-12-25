@@ -20,7 +20,7 @@ const houseState = {
 	EndRent: 3,
 	Cance: 4,
 	BreakRent: 5,
-	UnderContract: 6
+	AlreadyBreak: 6
 }
 
 const agreeState = {
