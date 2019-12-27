@@ -42,7 +42,7 @@ function releaseHouse(db, contract, contractToken, addr, privateKey, houseAddr, 
         let newBal;
         if (n > 6) {
            let temp = bal.slice(0, -6);
-           let newBal = parseFloat(temp);
+           let newBal = parseFloat(temp)/100;
            console.log("After parese value", temp, newBal);
            if (newBal < comVar.promiseAmount) {
               resolve({status: false, err: "RentToken数量不能满足保证金要求!余额为："+newBal})

@@ -307,8 +307,13 @@ intest()
 function intest() {
 	let testAddr = "0x1b9d88664a697e210ace82549ad9c6d21eac21ca";
 	let contract = new web3.eth.Contract(abi, contractAddress, {gasPrice: '3000000', from: userAddr});
+	// console.log(web3)
+	let val = web3.utils.toWei('0.24'+'', 'ether');
+	console.log(val)
 	web3.eth.getBalance(testAddr).then(res => {
-		console.log(res)
+		let balance = web3.utils.fromWei(res, 'ether');
+        console.log(balance, typeof(balance));
+
 	})
 }
 // 通过web3调用合约内的方法

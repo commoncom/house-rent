@@ -151,6 +151,20 @@ function initialize() {
           });
       });
   });
+  app.get('/approvetransfer/:to/:amount/:address/:prikey', (req, res) => {
+      console.log("-----get transfer approve params----", req.params)
+      setResHeadr(res);
+      contractToken.then(con => { 
+          TokenFun.transferApprove(con, req.params.to, req.params.amount, req.params.address, req.params.prikey).then(ctx => {
+              res.send(ctx);
+          }).catch(err => {
+            res.send({
+              "status": false,
+              "err": err
+            });
+          });
+      });  
+  });
   // 房屋认证
   app.get('/auth/:address/:idcard/:guid/:ownername/:userid/:prikey', (req, res) => {
       console.log("-----authenticate house params----", req.params)

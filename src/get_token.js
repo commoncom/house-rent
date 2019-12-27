@@ -32,11 +32,11 @@ function getAllBalance(contract, addr) {
         web3.eth.getBalance(addr).then(bal => {
             let tokenBal, ethBal;
             if (res && bal) {
-               tokenBal = res.slice(0, -6);
-               ethBal = bal.slice(0, -18);
+               tokenBal = parseFloat(res.slice(0, -6))/100;
+               ethBal = parseFloat(bal.slice(0, -10))/100000000;
             }
             console.log(res, 11, bal, 11, tokenBal, ethBal)
-            resolve({status: true, data: {"ethbal": bal, "tokenbal": res}});
+            resolve({status: true, data: {"ethbal": ethBal, "tokenbal": tokenBal}});
         }).catch(err => {
           console.log("get bal error:",err);
           reject({status: false, err: err});
@@ -91,7 +91,7 @@ function transferEth(contract, to, amount, from, privateKey) {
               to: to,
               from: from,
               chainId: 3,
-              value: amount,
+              value: web3.utils.toWei(amount+'', 'ether'),
               nonce: '0x' + nonce
           }
           web3.eth.accounts.signTransaction(txParams, privateKey).then(signedTx => {
@@ -111,14 +111,11 @@ function transferEth(contract, to, amount, from, privateKey) {
   });
 }
 // Call one for every contract
-function approveTransfer(contract, from, privateKey,spender, amount) {
+function transferApprove(contract, spender, amount, from, privateKey) {
   return new Promise((resolve, reject) => {
-      console.log("start approve transfer")
+      console.log("start approve transfer", spender);
       const transFun = contract.methods.approve(spender, amount);
       const transABI = transFun.encodeABI();
-      // packSendMsg(from, privateKey, spender, transABI).then((res, rej)=> {
-      //    resolve(res);
-      // });   
        packSendMsg(from, privateKey, spender, transABI).then(receipt => {
           if (receipt) {
             console.log("Approve success!");
@@ -191,7 +188,7 @@ module.exports = {
     initToken,
     getBalance,
     transferToken,
-    approveTransfer,
+    transferApprove,
     getAllBalance,
     transferEth
 }
