@@ -122,27 +122,33 @@ function initialize() {
     });
   });
   //Token transfer
-  app.get('/transfer/:address/:to/:amount/:prikey', (req, res) => {
-    console.log("-----get transfer params----", req.params)
-    TokenFun.transfer(contractToken, req.params.address, req.params.prikey, req.params.address, req.params.to, req.params.amount).then(ctx => {
-        res.send(ctx);
-    }).catch(err => {
-      res.send({
-        "status": false,
-        "err": err
-      });
-    });
+  app.get('/transfertoken/:to/:amount/:address/:prikey', (req, res) => {
+      console.log("-----get transfer token params----", req.params)
+      setResHeadr(res);
+      contractToken.then(con => { 
+          TokenFun.transferToken(con, req.params.to, req.params.amount, req.params.address, req.params.prikey).then(ctx => {
+              res.send(ctx);
+          }).catch(err => {
+            res.send({
+              "status": false,
+              "err": err
+            });
+          });
+      });  
   });
-  //Token transfer
-  app.get('/transferEth/:address/:to/:amount/:prikey', (req, res) => {
+  //Eth transfer
+  app.get('/transfereth/:to/:amount/:address/:prikey', (req, res) => {
       console.log("-----get transfer eth params----", req.params)
-      TokenFun.transfer(contractToken, req.params.prikey, req.params.address, req.params.to, req.params.amount).then(ctx => {
-          res.send(ctx);
-      }).catch(err => {
-        res.send({
-          "status": false,
-          "err": err
-        });
+      setResHeadr(res);
+      contractToken.then(con => { 
+          TokenFun.transferEth(con, req.params.to, req.params.amount, req.params.address, req.params.prikey).then(ctx => {
+              res.send(ctx);
+          }).catch(err => {
+            res.send({
+              "status": false,
+              "err": err
+            });
+          });
       });
   });
   // 房屋认证
@@ -369,6 +375,34 @@ function initialize() {
       contractHouse.then(con => {
           HouseFun.checkBreak(conn, con, req.params.houseid, req.params.punishamount, req.params.punishaddr, req.params.address, req.params.prikey).then(ctx => {
             res.send(ctx);
+          }).catch(err => {
+            res.send({
+              "status": false,
+              "err": err
+            });
+          });
+      });
+  });
+  app.get('/transfereth/:to/:amount/:address/:prikey', (req, res) => {
+      console.log("-----get transfer eth params----", req.params)
+      setResHeadr(res);
+      contractToken.then(con => { 
+          TokenFun.transferEth(con, req.params.to, req.params.amount, req.params.address, req.params.prikey).then(ctx => {
+              res.send(ctx);
+          }).catch(err => {
+            res.send({
+              "status": false,
+              "err": err
+            });
+          });
+      });
+  });
+  app.get('/getbalance/:address', (req, res) => {
+      console.log("-----get balance params----", req.params)
+      setResHeadr(res);
+      contractToken.then(con => { 
+          TokenFun.getAllBalance(con, req.params.address).then(ctx => {
+              res.send(ctx);
           }).catch(err => {
             res.send({
               "status": false,
