@@ -33,6 +33,14 @@ const agreeState = {
 	AlreadyBreak: 6// 已毁约
 }
 
+const commentState = {
+   AlreadyRent: 0, // 租赁已完成
+   AlreadyBreak: 1, // 已毁约
+   LandlordRemark: 2, // 房东已评论
+   LeaserRemark: 3, // 租客已评论
+   CloseRemark: 4 // 评论关闭
+}
+
 module.exports = {
 	disAmount,
 	disAddr,
@@ -47,6 +55,7 @@ module.exports = {
 	agreeConAddr,
 	promiseAmount,
 	houseState,
-	agreeState
+	agreeState,
+	commentState
 }
 

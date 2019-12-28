@@ -200,7 +200,7 @@ function breakContract(db, contract, addr, privateKey, houseId, reason) {
                             resolve({status:200, data: ctx.transactionHash});
                             let house_state = comVar.houseState.BreakRent; 
                             dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
-                            dbAgreeFun.updateAgreeState(db, houseId, comVar.agreeState.BreakRent); // 毁约
+                            dbAgreeFun.updateAgree(db, houseId, reason, comVar.agreeState.BreakRent); // 毁约
                           } else {
                             resolve({status:205, err:"毁约失败!"});
                           }

@@ -443,6 +443,17 @@ function initialize() {
           });
       });
   });
+  // 获取评论
+  app.get('/getcomment/:houseid', (req, res) => {
+      console.log("-----comment house params----", req.params)
+      setResHeadr(res);
+      comentManager.getComment(conn, req.params.houseid).then(ctx => {
+          res.send(ctx);
+      }).catch(err => {
+          console.log("get comment error", err)
+          res.send({status: false, err: err});
+      });
+  });
   // 评论房屋
   app.get('/commenthouse/:address/:prikey/:houseid/:ratingindex/reamrk', (req, res) => {
       console.log("-----withdraw coin params----", req.params)
