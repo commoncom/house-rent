@@ -122,11 +122,11 @@ function initialize() {
     });
   });
   //Token transfer
-  app.get('/transfertoken/:to/:amount/:address/:prikey', (req, res) => {
+  app.get('/transfertoken/:from/:to/:amount/:address/:prikey', (req, res) => {
       console.log("-----get transfer token params----", req.params)
       setResHeadr(res);
       contractToken.then(con => { 
-          TokenFun.transferToken(con, req.params.to, req.params.amount, req.params.address, req.params.prikey).then(ctx => {
+          TokenFun.transferToken(con, req.params.from, req.params.to, req.params.amount, req.params.address, req.params.prikey).then(ctx => {
               res.send(ctx);
           }).catch(err => {
             res.send({

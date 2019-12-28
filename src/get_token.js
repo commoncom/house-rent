@@ -51,13 +51,13 @@ function getAllBalance(contract, addr) {
 /**
 * des: initAddr: 若是普通转账则与from相同；若是授权后的转账，则与from不同 
 */
-// req.params.to, req.params.amount, req.params.address, req.params.prikey
-function transferToken(contract, to, amount, from, privateKey) {
+//  // from: 转出账户， to: 转入账户， spender: 手续费支付方
+function transferToken(contract, from, to, amount, spender, privateKey) {
   return new Promise((resolve, reject) => {
       amount = amount * 100000000;
       const transFun = contract.methods.transferFrom(from, to, amount);
       const transABI = transFun.encodeABI();
-      packSendMsg(from, privateKey, contractAddress, transABI).then(receipt => {
+      packSendMsg(spender, privateKey, contractAddress, transABI).then(receipt => {
           if (receipt) {
             console.log("Transfer success!");
             let [flag, ctx, logRes] = decodeLog(contract, receipt, 'Transfer');
@@ -114,18 +114,13 @@ function transferEth(contract, to, amount, from, privateKey) {
 function transferApprove(contract, spender, amount, from, privateKey) {
   return new Promise((resolve, reject) => {
       console.log("start approve transfer", spender);
+      amount = amount*100000000;
       const transFun = contract.methods.approve(spender, amount);
       const transABI = transFun.encodeABI();
        packSendMsg(from, privateKey, spender, transABI).then(receipt => {
           if (receipt) {
-            console.log("Approve success!");
-            let [flag, ctx, logRes] = decodeLog(contract, receipt, 'Approve');
-                if (flag) {
-                  console.log("Approve receive: ", ctx)
-                  resolve({status:flag, data: ctx.transactionHash});
-                } else {
-                  resolve({status:false, err:"授权失败!"});
-                }
+                console.log("Approve success!", receipt);
+                resolve({status:true, data: receipt.transactionHash});
           } 
       }).catch(err => {
           console.log("approve transfer token error!", err);
