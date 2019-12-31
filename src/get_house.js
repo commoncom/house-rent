@@ -5,6 +5,7 @@ let Web3EthAbi = require('web3-eth-abi');
 let comVar = require("./common/globe.js");
 let dbFun = require("./db/house.js");
 let dbAgreeFun = require("./db/agree.js");
+let dbCommentFun = require("./db/comment.js");
 let nonceMap = new Map();
 let RegisterFun = require("./get_register");
 let TokenFun = require("./get_token");
@@ -230,7 +231,12 @@ function checkBreak(db, contract, houseId, punishAmount, punishAddr, addr, priva
                   resolve({status:flag, data: ctx.transactionHash});
                   let house_state = comVar.houseState.AlreadyBreak; 
                   dbFun.updateReleaseInfo(db, "", addr, houseId, house_state);
-                  dbAgreeFun.updateAgreeState(db, houseId, comVar.agreeState.AlreadyBreak);
+                  let rtnData = dbAgreeFun.updateAgreeState(db, houseId, comVar.agreeState.AlreadyBreak);
+                  console.log(rtnData)
+                  if (rtnData.status) {
+                     let reason = rtnData.reason;
+                     dbCommentFun.insertCommentBreak(db, houseId, punishAmount, punishAddr, reason, rtnData.house_addr);
+                  }
                 } else {
                   resolve({status:false, err:"审核失败!"});
                 }

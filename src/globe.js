@@ -14,6 +14,7 @@ let addrManager = require("./db/addr.js");
 let houseManager = require("./db/house.js");
 let authManager = require("./db/auth.js");
 let agreeManager = require("./db/agree.js");
+let commentManager = require("./db/comment.js");
 
 let configuration = initParam.configuration;
 let regLists = new Map();
@@ -447,28 +448,26 @@ function initialize() {
   app.get('/getcomment/:houseid', (req, res) => {
       console.log("-----comment house params----", req.params)
       setResHeadr(res);
-      comentManager.getComment(conn, req.params.houseid).then(ctx => {
+      commentManager.getComment(conn, req.params.houseid).then(ctx => {
           res.send(ctx);
       }).catch(err => {
           console.log("get comment error", err)
           res.send({status: false, err: err});
       });
   });
-  // 评论房屋
-  app.get('/commenthouse/:address/:prikey/:houseid/:ratingindex/reamrk', (req, res) => {
+  // 评论房屋 ///comment/:houseId/:scope/:ctx/:add/:prikey
+  app.get('/comment/:houseid/:reltype/:ratingindex/reamrk/:address/:prikey', (req, res) => {
       console.log("-----withdraw coin params----", req.params)
-      HouseFun.commentHouse(contractHouse, req.params.address, req.params.prikey, req.params.houseid, req.params.ratingindex, req.params.reamrk).then(ctx => {
-       if (ctx) { // Already sign
+      setResHeadr(res);
+      contractHouse.then(con => {
+         HouseFun.commentHouse(con, req.params.reltype, req.params.houseid, req.params.ratingindex, req.params.reamrk, req.params.address, req.params.prikey).then(ctx => {
+            res.send(ctx);
+         }).catch(err => {
             res.send({
-              "status": ctx.status,
-              "txHash": ctx.transactionHash
+              "status": false,
+              "err": err
             });
-          }
-     }).catch(err => {
-        res.send({
-          "status": false,
-          "err": err
-        });
+          });
       });
   });
   // 获取房屋基本信息

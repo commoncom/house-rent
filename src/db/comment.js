@@ -1,6 +1,6 @@
 let comVar = require("../common/globe.js");
 // 房东签订合同记录表
-function insertCommentBreak(conn, houseId, punishAmount, punishAddr, reason) {
+function insertCommentBreak(conn, houseId, punishAmount, punishAddr, reason, houseAddr) {
 	console.log("-------insert Comment Record---------", phoneNum)
 	return new Promise((resolve, reject) => {
 		conn.then(con => {
@@ -13,8 +13,8 @@ function insertCommentBreak(conn, houseId, punishAmount, punishAddr, reason) {
 			    // if (result != null && result.length != 0) { // 如果已经有该记录，则更新    	
 			    // } else { // 插入评论记录表
 		    	let state = comVar.CommentState.AlreadyBreak;  // houseId, punishAmount, punishAddr, reason
-				let insertSql = "INSERT INTO house_comment_record (`house_id`, `state`, `punish_amount`, `punish_addr`, `reason`, `createtime`, `updatetime`) VALUES ?";
-				let addParam = [[houseId, state, punishAmount, punishAddr, reason, Date.now(), Date.now()]]; // Mul
+				let insertSql = "INSERT INTO house_comment_record (`house_id`, `house_addr`,`state`, `punish_amount`, `punish_addr`, `reason`, `createtime`, `updatetime`) VALUES ?";
+				let addParam = [[houseId, houseAddr, state, punishAmount, punishAddr, reason, Date.now(), Date.now()]]; // Mul
 				con.query(insertSql, [addParam], function(err, result, fileds){
 					console.log("--insert comment info-----",result);
 					if (err) {
@@ -32,7 +32,7 @@ function insertCommentBreak(conn, houseId, punishAmount, punishAddr, reason) {
 		});
 	});
 }
-function insertCommentRecord(conn, houseId) {
+function insertCommentRecord(conn, houseId, houseAddr) {
 	console.log("-------insert Comment Record---------", phoneNum)
 	return new Promise((resolve, reject) => {
 		conn.then(con => {
@@ -45,8 +45,8 @@ function insertCommentRecord(conn, houseId) {
 			    // if (result != null && result.length != 0) { // 如果已经有该记录，则更新    	
 			    // } else { // 插入评论记录表
 		    	let state = comVar.CommentState.AlreadyRent;  // houseId, punishAmount, punishAddr, reason
-				let insertSql = "INSERT INTO house_comment_record (`house_id`, `state`, `createtime`, `updatetime`) VALUES ?";
-				let addParam = [[houseId, state, Date.now(), Date.now()]]; // Mul
+				let insertSql = "INSERT INTO house_comment_record (`house_id`, `house_addr`, `state`, `createtime`, `updatetime`) VALUES ?";
+				let addParam = [[houseId, houseAddr, state, Date.now(), Date.now()]]; // Mul
 				con.query(insertSql, [addParam], function(err, result, fileds){
 					console.log("--insert comment info-----",result);
 					if (err) {
@@ -65,7 +65,7 @@ function insertCommentRecord(conn, houseId) {
 	});
 }
 // 查询房东签订信息
-function queryComment(conn, houseId) {
+function getComment(conn, houseId) {
 	console.log("-------query comment--------", houseId)
 	return new Promise((resolve, reject) => {
 		conn.then(con => {
@@ -168,7 +168,7 @@ function updateCommentState(conn, houseId, state) {
 module.exports = {
 	insertCommentBreak,
 	insertCommentRecord,
-	queryComment,
+	getComment,
 	leaserUpdateComment,
 	landlordUpdateComment,
 	updateCommentState

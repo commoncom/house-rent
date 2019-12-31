@@ -126,13 +126,13 @@ function updateAgree(conn, houseId, reason, state) {
 			con.query("SELECT * FROM house_transaction_record WHERE house_id = ? ", [houseId],  function (err, result, fields) {
 			    if (err) {
 			    	console.log("Query agreement record after update info", err);
-			    	reject(err);
+			    	reject({status: false, err: err});
 			    }
-			    resolve({status: true, err: result});
+			    resolve({status: true, data: result});
 		    });
 		}).catch(err => {
 			console.log("----query-agreement record--error---" ,err)
-			reject(err);
+			reject({status: false, err: err});
 		});
 	});
 }
