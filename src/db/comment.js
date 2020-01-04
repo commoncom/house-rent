@@ -98,7 +98,7 @@ function leaserUpdateComment(conn, houseId, leaserRemarkScope, leaserComment, le
 	return new Promise((resolve, reject) => {
 		conn.then(con => {
 		    let sql = "UPDATE `house_comment_record` SET `leaser_remark_scope` = ?, `leaser_addr` = ?, `state` = ?, `leaser_comment` = ?, `updatetime` = ? WHERE `house_id` = ?";
-			let condition = [leaserRemarkScope, leaserAddr, comVar.CommentState.LeaserRemark, leaserComment, Date.now(), houseId];
+			let condition = [leaserRemarkScope, leaserAddr, comVar.commentState.LeaserRemark, leaserComment, Date.now(), houseId];
 			con.query(sql, condition, function(err, result, fileds){
 				console.log("---update ---", result);
 			});

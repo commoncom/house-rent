@@ -6,9 +6,9 @@ testRegister()
 
 function testRegister() {
 	RegisterFun.initReg().then(con => {
-		let addr = "0x12bb671c44c2593efaae0108d4db4b838792c3cc";
-		let name = "forget2019";
-		RegisterFun.isAlreayReg(con, addr, name).then(res => {
+		let addr = "0x0bf8cd3736043250e6d7e4e7c8127972e10328ac";
+		let name = "zlw2025";
+		RegisterFun.isLogin(con, addr).then(res => {
 			console.log(res)
 		})
 	});

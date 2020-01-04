@@ -248,47 +248,37 @@ function checkBreak(db, contract, houseId, punishAmount, punishAddr, addr, priva
   });
 }
 
-function commentHouse(contract, addr, privateKey, houseId, ratingIndex, remark) {
+// 评论房源
+function commentHouse(db, contract, relType, houseId, ratingIndex, remark, addr, privateKey) {
   return new Promise((resolve, reject) => {
-    checkLogin(addr).then(flag => {
-      if (!flag) {
-        console.log("Please login in first");
-        resolve(false);
-      } else {
-        TokenFun.initHouseFunToken().then(con => {
-          TokenFun.approveTransfer(con, comVar.disAddr, comVar.privKey, addr, comVar.disAmount).then((res, rej) => {
+    TokenFun.initToken().then(con => {
+          TokenFun.transferApprove(con, addr, comVar.disAmount, comVar.disAddr, comVar.privKey).then((res, rej) => {
             console.log(res, addr)
             if (res) {
-              const reqFun = contract.methods.commentHouse(houseId, ratingIndex, remark);
+                const reqFun = contract.methods.commentHouse(houseId, ratingIndex, remark);
                 const reqABI = reqFun.encodeABI();
                 console.log("Start comment the house!", addr);
                 packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
-                    if (receipt) {
-                      console.log("Comment the house success!");
-                      const eventJsonInterface = contract._jsonInterface.find(
-                    o => (o.name === 'CommentHouse') && o.type === 'event');
-                  if (JSON.stringify(receipt.logs) != '[]') {
-                    const log = receipt.logs.find(
-                      l => l.topics.includes(eventJsonInterface.signature)
-                    )
-                    let houseRel = Web3EthAbi.decodeLog(eventJsonInterface.inputs, log.data, log.topics.slice(1))
-                      console.log(houseRel);
-                      resolve(receipt);
-                  }
-                    } else {
-                      console.log("Comment the house fail!");
-                    }
-              }).catch(err => {
-                console.log("Comment the house occure error!", err);
-                reject(err);
-              });
+                    let [flag, ctx, logRes] = decodeLog(contract, receipt, 'CommentHouse');
+                    console.log("Decode comment the contract receive: ", ctx)
+                    resolve({status:200, data: ctx.transactionHash});
+                    if (relType == '1' || relType == 1) { // 房东
+                        dbCommentFun.landlordUpdateComment(db, houseId, ratingIndex, remark, addr);
+                    } else { // 租户  
+                        dbCommentFun.leaserUpdateComment(db, houseId, ratingIndex, remark, addr);
+                    }  
+                }).catch(err => {
+                   console.log("Comment the house occure error!", err);
+                   reject(err);
+                });
             }
+          }).catch(err => {
+               console.log("approve error", err);
+               resolve({status: 204, err: "授权失败！"});
           });
-        }).catch(err => {
-           console.log("distribute reward approval fail", err);
-           reject(err);
-        });
-      }
+    }).catch(err => {
+       console.log("Init token", err);
+       reject(err);
     });
   });
 }

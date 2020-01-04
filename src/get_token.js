@@ -163,18 +163,27 @@ function packSendMsg(formAddr, privateKey, toAddr, createABI) {
             chainId: 3,
             nonce: '0x' + nonce
         }
+        console.log("start sign the transaction")
         web3.eth.accounts.signTransaction(txParams, privateKey).then(signedTx => {
-            web3.eth.sendSignedTransaction(signedTx.rawTransaction).then(receipt => {
-                if (receipt.status) {
-                   resolve(receipt);
-                } else {
-                  console.log("this user already regiester");
-                  reject("send sign transaction error");
-                }
-            }).catch(err => {
-                reject(err);
-            });
-        });
+          console.log("start send the transaction")
+          web3.eth.sendSignedTransaction(signedTx.rawTransaction).then(receipt => {
+            if (receipt.status) {
+              console.log(receipt.transactionHash)
+              resolve(receipt);
+            } else {
+              reject("发送交易失败!");
+            }
+          }).catch(err1 => {
+            console.log("Send Fail:", err1);
+            reject(err1);
+          });
+        }).catch(err => {
+          console.log("Sign Fail:", err);
+          reject(err);
+        });;
+      }).catch(err => {
+        console.log("GetTransactionCount Fail:", err);
+        reject(err);
       });
     });   
 }

@@ -2,7 +2,7 @@ const Tx = require('ethereumjs-tx');
 var Web3 = require("web3");
 var web3 = new Web3();
 web3.setProvider(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/2571ab4c0de14ffb87392fb9c3904375"));
-
+// console.log(web3)
 
 const fs = require("fs");
 const readFile = require("util").promisify(fs.readFile);

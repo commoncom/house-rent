@@ -55,15 +55,23 @@ function initialize() {
     });
   });
   // 获取用户链上状态
-  app.get('/getstatus/:addr', (req, res) => {
+  app.get('/getstatus/:address', (req, res) => {
     console.log("-----get userid and address params----", req.params)
     setResHeadr(res);
-    addrManager.queryUserStatus(conn, req.params.addr).then(ctx => {
-        console.log(ctx)
-        res.send(ctx);
+    contractReg.then(con => {
+      console.log("reg contract");
+        RegisterFun.getStatus(conn, con, req.params.address).then(ctx => {
+          // console.log(ctx)
+          res.send(ctx);
+        }).catch(err => {
+          console.log("get status error:", err)
+          res.send(err);
+        });       
     }).catch(err => {
-        console.log("get status error", err)
-        res.send({status: 204, err: err});
+      res.send({
+        "status": false,
+        "err": err
+      });
     });
   });
   // 注册
@@ -456,15 +464,15 @@ function initialize() {
       });
   });
   // 评论房屋 ///comment/:houseId/:scope/:ctx/:add/:prikey
-  app.get('/comment/:houseid/:reltype/:ratingindex/reamrk/:address/:prikey', (req, res) => {
-      console.log("-----withdraw coin params----", req.params)
+  app.get('/comment/:houseid/:reltype/:ratingindex/:reamrk/:address/:prikey', (req, res) => {
+      console.log("-----comment params----", req.params)
       setResHeadr(res);
       contractHouse.then(con => {
-         HouseFun.commentHouse(con, req.params.reltype, req.params.houseid, req.params.ratingindex, req.params.reamrk, req.params.address, req.params.prikey).then(ctx => {
+         HouseFun.commentHouse(conn, con, req.params.reltype, req.params.houseid, req.params.ratingindex, req.params.reamrk, req.params.address, req.params.prikey).then(ctx => {
             res.send(ctx);
          }).catch(err => {
             res.send({
-              "status": false,
+              "status": 201,
               "err": err
             });
           });
