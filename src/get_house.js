@@ -38,15 +38,20 @@ function releaseHouse(db, contract, contractToken, addr, privateKey, houseAddr, 
     contractToken.then(con => {
       console.log(addr.length, addr);
       TokenFun.getBalance(con, addr).then(bal => {
-        console.log("bal", bal, typeof(bal), bal.length)
-        let n = bal.length;
+        console.log("bal", bal, typeof(bal), bal.data.length)
+        if (!bal.status) {
+            resolve({status: false, err: "RentToken数量不能满足保证金要求!"});
+            return;
+        }
+        let tempBal = bal.data;
+        let n = tempBal.length;
         let newBal;
         if (n > 6) {
-           let temp = bal.slice(0, -6);
+           let temp = tempBal.slice(0, -6);
            let newBal = parseFloat(temp)/100;
            console.log("After parese value", temp, newBal);
            if (newBal < comVar.promiseAmount) {
-              resolve({status: false, err: "RentToken数量不能满足保证金要求!余额为："+newBal})
+              resolve({status: false, err: "RentToken数量不能满足保证金要求!余额为："+newBal});
            } else {
               console.log("---start release house---")
             checkLogin(addr).then(flag => {
