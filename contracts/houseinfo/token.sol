@@ -1,48 +1,49 @@
 pragma solidity ^0.4.24;
 //  RentHouse Foundation.
 
-contract ERC20Interface {
-    function totalSupply() public constant returns (uint256 _totalSupply);
-    function balanceOf(address _owner) public constant returns (uint256 balance);
-    function transfer(address _to, uint256 _value) public returns (bool success);
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
-    function approve(address _spender, uint256 _value) public returns (bool success);
-    function allowance(address _owner, address _spender) public constant returns (uint256 remaining);
-    event Transfer(address indexed _from, address indexed _to, uint256 _value);
-    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-}
+// contract ERC20Interface {
+//     function totalSupply() public view returns (uint256 _totalSupply);
+//     function balanceOf(address _owner) public view returns (uint256 balance);
+//     function transfer(address _to, uint256 _value) public returns (bool success);
+//     function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
+//     function approve(address _spender, uint256 _value) public returns (bool success);
+//     function allowance(address _owner, address _spender) public view returns (uint256 remaining);
+//     event Transfer(address indexed _from, address indexed _to, uint256 _value);
+//     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+// }
 
-contract RentToken is ERC20Interface {
+contract RentToken {
     using SafeMath for uint256;
-    uint256 public constant decimals = 8;
+    uint8 public constant decimals = 8;
 
     string public constant symbol = "RentToken";
     string public constant name = "BLT";
 
     uint256 public _totalSupply = 40 * (10 ** 8) * (10 ** 8); // total supply is 4 billion
     uint256 public _maxIncreaseAmount = 2 * (10 ** 8) * (10 ** 8); //  every time max increase 20 millions
-    uint256 public _increaseInterval = 1 years;  // 6 month interval can increase
+    uint256 public _increaseInterval = 1  years;  // 6 month interval can increase
 
     // Owner of this contract
     address public owner;
 
     // Balances AAC for each account
-    mapping(address => uint256) private balances;
+    mapping(address => uint256) public  balances;
 
     // Owner of account approves the transfer of an amount to another account
-    mapping(address => mapping (address => uint256)) private allowed;
+    mapping(address => mapping (address => uint256)) public  allowed;
 
     // List of approved investors
-    mapping(address => bool) private approvedInvestorList;
+    mapping(address => bool) public approvedInvestorList;
 
     // deposit
-    mapping(address => uint256) private deposit;
+    mapping(address => uint256) public deposit;
 
 
     // totalTokenSold
     uint256 public totalTokenSold = 0;
     uint256 public releaseTokenTime = block.timestamp;
-
+     event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
     /**
      * @dev Fix for the ERC20 short address attack.
      */
@@ -61,7 +62,7 @@ contract RentToken is ERC20Interface {
     }
 
     /// @dev Constructor
-    function RentToken()
+    constructor()
         public {
         owner = msg.sender;
         balances[owner] = _totalSupply;
@@ -71,17 +72,19 @@ contract RentToken is ERC20Interface {
     /// @return Total supply
     function totalSupply()
         public
-        constant
+        view
         returns (uint256) {
         return _totalSupply;
     }
-
+    function isToken() public pure returns(bool isIndeed) {
+        return true;
+    }
     /// @dev Gets account's balance
     /// @param _addr Address of the account
     /// @return Account balance
     function balanceOf(address _addr)
         public
-        constant
+        view
         returns (uint256) {
         return balances[_addr];
     }
@@ -90,7 +93,7 @@ contract RentToken is ERC20Interface {
     /// @param _addr address
     function isApprovedInvestor(address _addr)
         public
-        constant
+        view
         returns (bool) {
         return approvedInvestorList[_addr];
     }
@@ -100,7 +103,7 @@ contract RentToken is ERC20Interface {
     /// @return amount deposit of an buyer
     function getDeposit(address _addr)
         public
-        constant
+        view
         returns(uint256){
         return deposit[_addr];
     }
@@ -120,7 +123,7 @@ contract RentToken is ERC20Interface {
         require(_amount > 0);
         balances[msg.sender] = balances[msg.sender].Sub(_amount);
         balances[_to] = balances[_to].Add(_amount);
-        Transfer(msg.sender, _to, _amount);
+         Transfer(msg.sender, _to, _amount);
         return true;
     }
 
@@ -141,9 +144,8 @@ contract RentToken is ERC20Interface {
         require(_amount > 0);
         if (balances[_from] >= _amount) {
             balances[_from] = balances[_from].Sub(_amount);
-            allowed[_from][msg.sender] = allowed[_from][msg.sender].Sub(_amount);
             balances[_to] = balances[_to].Add(_amount);
-            Transfer(_from, _to, _amount);
+             Transfer(_from, _to, _amount);
             return true;
         } else {
             return false;
@@ -153,11 +155,9 @@ contract RentToken is ERC20Interface {
     // Allow _spender to withdraw from your account, multiple times, up to the _value amount.
     // If this function is called again it overwrites the current allowance with _value.
     function approve(address _spender, uint256 _amount)
-        public
-
-        returns (bool success) {
-        require((_amount == 0) || (allowed[msg.sender][_spender] == 0));
-        allowed[msg.sender][_spender] = _amount;
+        public returns (bool success) {
+        require((_amount > 0) && (allowed[msg.sender][_spender]+_amount <= balances[msg.sender]));
+        allowed[msg.sender][_spender] = allowed[msg.sender][_spender].Add(_amount);
         Approval(msg.sender, _spender, _amount);
         return true;
     }
@@ -165,26 +165,9 @@ contract RentToken is ERC20Interface {
     // get allowance
     function allowance(address _owner, address _spender)
         public
-        constant
+        view
         returns (uint256 remaining) {
         return allowed[_owner][_spender];
-    }
-
-    function increaseAmount() internal onlyOwner  {
-        uint256  nowTime = block.timestamp;
-        uint256 nextTime = releaseTokenTime.Add(_increaseInterval);
-        require(nextTime > nowTime);
-        _totalSupply = _totalSupply.Add(_maxIncreaseAmount);
-        uint256   timeInterval = 1 years;
-        _increaseInterval = _increaseInterval.Add(timeInterval);
-    } 
-
-    function decreaseAmount(uint amount) internal onlyOwner {
-        _totalSupply = _totalSupply.Sub(amount);
-    }
-
-    function () public payable{
-        revert();
     }
 
 }
