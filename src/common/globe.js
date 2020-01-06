@@ -6,11 +6,11 @@ const regpri = "0x8C6817D77CFD962F6EAB191251B9720D3EB76221AE5A28379C9B3D03EC68EA
 
 // contract address
 const tokenConAddr = "0xfed21ab2993faa0e0b2ab92752428d96370d4889";
-const regConAddr = "0xe61458be3abb3483375db08685cbcd899502a21a";
+const regConAddr = "0x89c93a7c4cfda689f19afb45c705c3e6a0d56a72";
 const remarkConAddr = "0xb7fdf357abf21d7d6aa0e956c2a4ba38651025f9";
-const authConAddr= "0x0455633466ab2091171489c4c85103b530371bdb";
-const houseConAddr = "0x49a65853dd645a8dfe615f882ec051a661bb3d1a";
-const agreeConAddr = "0xeb3f9a644bf55089ad09aa4bcbf202b513c7e58c";
+const authConAddr= "0x788278aefccfd3545aeebca0141115e1217ebe03";
+const houseConAddr = "0x508c73a58706a11f81266b008c28633170c8bbf4";
+const agreeConAddr = "0x09a9e20bd5ea225854b26a50e48f740f905fb98f";
 
 const promiseAmount = 50;
 const houseState = {

@@ -2,7 +2,7 @@ let HouseFun = require("./get_house.js");
 let RegisterFun = require("./get_register.js");
 let web3 = require("./common/contract_com.js").web3;
 
-testRegister()
+// testRegister()
 
 function testRegister() {
 	RegisterFun.initReg().then(con => {
@@ -13,7 +13,7 @@ function testRegister() {
 		})
 	});
 }
-
+testHouse()
 function testHouse() {
 	HouseFun.initHouseFun().then(con => {
 	let addr = "0xaDCe9984d4d2E3936A0eB6F21a6105217a3E8766";	
@@ -67,7 +67,7 @@ function testHouse() {
 	// commentHouse(con, addr2, priKey2, houseId, ratingIndex, remark).then(res => {
 
 	// });
-	let houseId3 = "0x6eff8e3db86afe6dbcde6c10b81fbce7b7d6b88e77516d1ba644816a21e76868";
+	let houseId3 = "0x6384f48529cf2cb68120097aa1f382eda47bf476f0186e24be7660c7f40949f7";
 	let houseId2 = "0x81800316020f90b6b421cdd4ed1cba7310b271c1c913f2de6e10d7b96dad65c8";
 	HouseFun.getHouseRelaseInfo(con, houseId3).then(res => {
 		console.log(res, res.data[0], 1111)
