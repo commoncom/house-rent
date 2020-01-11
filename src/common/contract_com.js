@@ -16,7 +16,7 @@ async function run(filePath) {
    }    
 }
 // GetContract("../ethererscan/token_abi.json", "0xfed21ab2993faa0e0b2ab92752428d96370d4889", contract => {
-// 	console.log(contract)
+// 	// console.log(contract)
 // })
 function GetContract(filePath, contractAddress) {
 	return new Promise((resolve, reject) => {
@@ -25,6 +25,8 @@ function GetContract(filePath, contractAddress) {
 			// console.log(contractAddress)
 			let contract = new web3.eth.Contract(objABI, contractAddress,{gasPrice: '3000000'});
 			// console.log(contract)
+			// var version = web3.version;
+			// console.log(version);
 			resolve(contract);
 		}).catch(err => {
 		   console.log("Read ABI Fail:", err);

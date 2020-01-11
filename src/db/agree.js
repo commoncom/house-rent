@@ -42,10 +42,10 @@ function querySignInfo(conn, houseId) {
 		conn.then(con => {
 			let sql, criteria;
 			if (!houseId || houseId == '0x') {
-				sql = "SELECT * FROM house_transaction_record";
+				sql = "SELECT * FROM house_transaction_record ORDER BY updatetime DESC";
 				criteria = [];
 			} else {
-				sql = "SELECT * FROM house_transaction_record WHERE `house_id` = ?";
+				sql = "SELECT * FROM house_transaction_record WHERE `house_id` = ? ORDER BY updatetime DESC";
 				criteria = [houseId];
 			} 
 			con.query(sql, criteria,  function (err, result, fields) {

@@ -20,7 +20,8 @@ const houseState = {
 	EndRent: 3,
 	Cance: 4,
 	BreakRent: 5,
-	AlreadyBreak: 6
+	AlreadyBreak: 6,
+	RejectBreak: 9 // 拒绝毁约
 }
 
 const agreeState = {
@@ -30,7 +31,8 @@ const agreeState = {
 	EndRent: 3, // 租赁到期
 	Cance: 4, // 取消租赁
 	BreakRent: 5,// 毁约审核中
-	AlreadyBreak: 6// 已毁约
+	AlreadyBreak: 6,// 已毁约
+	RejectBreak: 9 // 拒绝毁约
 }
 
 const commentState = {

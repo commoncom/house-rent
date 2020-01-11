@@ -122,7 +122,7 @@ function landlordUpdateComment(conn, houseId, landlordRemarkScope, landlordComme
 	return new Promise((resolve, reject) => {
 		conn.then(con => {
 		    let sql = "UPDATE `house_comment_record` SET `landlord_remark_scope` = ?, `landlord_addr` = ?, `state` = ?, `landlord_comment` = ?, `updatetime` = ? WHERE `house_id` = ?";
-			let condition = [landlordRemarkScope, landlordAddr, comVar.CommentState.LandlordRemark, landlordComment, Date.now(), houseId];
+			let condition = [landlordRemarkScope, landlordAddr, comVar.commentState.LandlordRemark, landlordComment, Date.now(), houseId];
 			con.query(sql, condition, function(err, result, fileds){
 				console.log("---update ---", result);
 			});

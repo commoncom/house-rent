@@ -20,7 +20,7 @@ function getBalance(contract, addr) {
       resolve({status: true, data: res});
     }).catch(err => {
       console.log("get bal error:",err);
-      reject({status: false, err: err});
+      reject({status: false, err: "未获取到余额!"});
     });
   });
 }
@@ -39,7 +39,7 @@ function getAllBalance(contract, addr) {
             resolve({status: true, data: {"ethbal": ethBal, "tokenbal": tokenBal}});
         }).catch(err => {
           console.log("get bal error:",err);
-          reject({status: false, err: err});
+          reject({status: false, err: "未获取到余额!"});
         });
       }).catch(err => {
         console.log("get bal error:",err);

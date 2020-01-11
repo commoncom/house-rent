@@ -305,7 +305,6 @@ function initialize() {
       });
   });
   // 签订合同
-  // app.get('/sign/:address/:prikey/:name/:signlong/:rental/:yearrent', (req, res) => {
   app.get('/sign/:username/:idcard/:phonenum/:rental/:tenacy/:houseid/:houseaddr/:falsify/:housedeadline/:houseuse/:payone/:addr/:prikey', (req, res) => {
       console.log("-----sign house params----", req.params);
       setResHeadr(res);
@@ -406,6 +405,21 @@ function initialize() {
           });
       });
   });
+  // 拒绝毁约
+  // app.get('/rejectbreak/:houseid/:rej_reason/:address/:prikey', (req, res) => {
+  //     console.log("-----check break agreement params----", req.params)
+  //     setResHeadr(res);
+  //     contractHouse.then(con => {
+  //         HouseFun.rejectBreak(conn, con, req.params.houseid, req.params.rej_reason, req.params.address, req.params.prikey).then(ctx => {
+  //           res.send(ctx);
+  //         }).catch(err => {
+  //           res.send({
+  //             "status": false,
+  //             "err": err
+  //           });
+  //         });
+  //     });
+  // });
   app.get('/transfereth/:to/:amount/:address/:prikey', (req, res) => {
       console.log("-----get transfer eth params----", req.params)
       setResHeadr(res);

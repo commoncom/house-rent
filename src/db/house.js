@@ -39,10 +39,10 @@ function queryReleaseInfo(conn, houseId, houseState) {
 		conn.then(con => {
 			let sql, criteria;
 			if (houseId == '0x') {
-				sql = "SELECT * FROM house_release_info WHERE house_state = ?";
+				sql = "SELECT * FROM house_release_info WHERE house_state = ? ORDER BY updatetime DESC";
 				criteria = [houseState];
 			} else {
-				sql = "SELECT * FROM house_release_info WHERE house_id = ? and house_state = ?";
+				sql = "SELECT * FROM house_release_info WHERE house_id = ? and house_state = ? ORDER BY updatetime DESC";
 				criteria = [houseId, houseState];
 			} 
 			con.query(sql, criteria,  function (err, result, fields) {

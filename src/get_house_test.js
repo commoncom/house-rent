@@ -67,7 +67,7 @@ function testHouse() {
 	// commentHouse(con, addr2, priKey2, houseId, ratingIndex, remark).then(res => {
 
 	// });
-	let houseId3 = "0x6384f48529cf2cb68120097aa1f382eda47bf476f0186e24be7660c7f40949f7";
+	let houseId3 = "0x3e16cb42ffc3521d5edbdc23d8f1744a2335ad7b2e8b4242269b0225475dc6cf";
 	let houseId2 = "0x81800316020f90b6b421cdd4ed1cba7310b271c1c913f2de6e10d7b96dad65c8";
 	HouseFun.getHouseRelaseInfo(con, houseId3).then(res => {
 		console.log(res, res.data[0], 1111)
