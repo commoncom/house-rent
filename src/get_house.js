@@ -297,7 +297,7 @@ function commentHouse(db, contract, relType, houseId, ratingIndex, remark, addr,
             }
           }).catch(err => {
                console.log("approve error", err);
-               resolve({status: 204, err: "授权失败！"});
+               resolve({status: 204, err: "评论失败！"});
           });
     }).catch(err => {
        console.log("Init token", err);
