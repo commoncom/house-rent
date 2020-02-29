@@ -10,7 +10,7 @@ const regConAddr = "0x51f807fb009c77b3ca57d363ba581444afa619e5";
 const remarkConAddr = "0xb7fdf357abf21d7d6aa0e956c2a4ba38651025f9";
 const authConAddr= "0x063dc23b5332063ab5f88c23d3fb8545eb01c576";
 const houseConAddr = "0x8a84a496682adbe32131b4d49ce3a17cbbfe22b6";
-const agreeConAddr = "0x09a9e20bd5ea225854b26a50e48f740f905fb98f";
+const agreeConAddr = "0x09cd6647c7a97dc1a9e8afc0bf0a8309ebec91e9";
 
 const promiseAmount = 50;
 const houseState = {
