@@ -81,7 +81,7 @@ function decodeLog(contract, receipt, eventName) {
         l => l.topics.includes(eventJsonInterface.signature)
       );
       let decodeLog = Web3EthAbi.decodeLog(eventJsonInterface.inputs, log.data, log.topics.slice(1))
-        console.log(decodeLog)
+        console.log("decode-log:",decodeLog)
         return [true, receipt];
     } else {
       return [false, "Cannt find logs"];

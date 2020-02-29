@@ -108,58 +108,58 @@ function approveVisit(db, contract, houseId, addr, approveAddr, arpprovePrikey) 
 
 function getHouseOwer(contract, houseId, addr) {
 	return new Promise((resolve, reject) => {
-		contract.methods.getHouseOwer().call({from:addr}).then(res => {
+		contract.methods.getHouseOwer(addr).call().then(res => {
 			console.log("get house owner", res);
 			resolve({status: true, data: res});
 		}).catch(err => {
 			console.log("get auth info error:", err)
-			reject({status:false, data: err});
+			reject({status:false, err: err});
 		});
-	})
+	});
 }
 
 function packSendMsg(formAddr, privateKey, toAddr, createABI) {
-		let gas, nonce;
-		return new Promise((resolve, reject) => {
-			gas = 20000000000;
-			web3.eth.getTransactionCount(formAddr, 'pending').then(_nonce => {
-				if (nonceMap.has(_nonce)) {
-					_nonce += 1
-				}
-				nonceMap.set(_nonce, true);
-				nonce = _nonce.toString(16);
-				const txParams = {
-				  gasPrice: gas,
-			      gasLimit: 2000000,
-			      to: toAddr,
-			      data: createABI,
-			      from: formAddr,
-			      chainId: 3,
-			      nonce: '0x' + nonce
-				}
-				console.log("start sign the transaction")
-				web3.eth.accounts.signTransaction(txParams, privateKey).then(signedTx => {
-					console.log("start send the transaction")
-			 		web3.eth.sendSignedTransaction(signedTx.rawTransaction).then(receipt => {
-			 			if (receipt.status) {
-			 				console.log(receipt.transactionHash)
-			 				resolve(receipt);
-			 			} else {
-			 				reject("发送交易失败!");
-			 			}
-			 		}).catch(err1 => {
-			 			console.log("Send Fail:", err1);
-			 			reject(err1);
-			 		});
-				}).catch(err => {
-		 			console.log("Sign Fail:", err);
-		 			reject(err);
-		 		});;
-			}).catch(err => {
-	 			console.log("GetTransactionCount Fail:", err);
-	 			reject(err);
-	 		});
-		});	 	
+    let gas, nonce;
+    return new Promise((resolve, reject) => {
+      gas = 20000000000;
+      web3.eth.getTransactionCount(formAddr, 'pending').then(_nonce => {
+        if (nonceMap.has(_nonce)) {
+          _nonce += 1
+        }
+        nonceMap.set(_nonce, true);
+        nonce = _nonce.toString(16);
+        const txParams = {
+          gasPrice: gas,
+            gasLimit: 2000000,
+            to: toAddr,
+            data: createABI,
+            from: formAddr,
+            chainId: 3,
+            nonce: '0x' + nonce
+        }
+        console.log("start sign the transaction")
+        web3.eth.accounts.signTransaction(txParams, privateKey).then(signedTx => {
+          console.log("start send the transaction")
+          web3.eth.sendSignedTransaction(signedTx.rawTransaction).then(receipt => {
+            if (receipt.status) {
+              console.log(receipt.transactionHash)
+              resolve(receipt);
+            } else {
+              reject("发送交易失败!");
+            }
+          }).catch(err1 => {
+            console.log("Send Fail:", err1);
+            reject(err1);
+          });
+        }).catch(err => {
+          console.log("Sign Fail:", err);
+          reject(err);
+        });;
+      }).catch(err => {
+        console.log("GetTransactionCount Fail:", err);
+        reject(err);
+      });
+    });   
 }
 
 function decodeLog(contract, receipt, eventName) {
@@ -185,3 +185,12 @@ module.exports = {
 	approveVisit,
 	getHouseOwer
 }
+
+
+// initAuth().then(con => {
+// 	let houseId= "0x92d93a3696039fb9719e63d1cc72827cc3e8405549f654c4bfd780c9f5a85d63";
+// 	let addr = "0x12bb671c44c2593efaae0108d4db4b838792c3cc";
+// 	getHouseOwer(con, houseId, addr).then((res, rej) => {
+// 		console.log(4343, res);
+// 	});
+// });

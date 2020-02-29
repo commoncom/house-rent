@@ -22,15 +22,22 @@ initialize()
 function initialize() {
   return new Promise((resolve, reject) => {
   const app = express();
+  console.log("Start Creating Server");
   server = http.createServer(app);
+  console.log("Start running token management contract instance");
   let contractToken = TokenFun.initToken();
+  console.log("Start running register management contract instance");
   let contractReg = RegisterFun.initReg();
+  console.log("Start running house management contract instance");
   let contractHouse = HouseFun.initHouseFun();
+  console.log("Start running remark management contract instance");
   let contractRemark = RemarkFun.initRemark();
+  console.log("Start running authentication management contract instance");
   let contractAuth = AuthFun.initAuth();
+  console.log("Start running contract management contract instance");
   let contractAgree = AgreeFun.initAgreeFun();
   let conn = initParam.connDb();
-  console.log("----Init-----")
+  console.log("----Init database success---");
   // 
   app.get('/bindaddr/:userid/:address', (req, res) => {
     console.log("-----bind userid and address params----", req.params)
@@ -420,20 +427,20 @@ function initialize() {
   //         });
   //     });
   // });
-  app.get('/transfereth/:to/:amount/:address/:prikey', (req, res) => {
-      console.log("-----get transfer eth params----", req.params)
-      setResHeadr(res);
-      contractToken.then(con => { 
-          TokenFun.transferEth(con, req.params.to, req.params.amount, req.params.address, req.params.prikey).then(ctx => {
-              res.send(ctx);
-          }).catch(err => {
-            res.send({
-              "status": false,
-              "err": err
-            });
-          });
-      });
-  });
+  // app.get('/transfereth/:to/:amount/:address/:prikey', (req, res) => {
+  //     console.log("-----get transfer eth params----", req.params)
+  //     setResHeadr(res);
+  //     contractToken.then(con => { 
+  //         TokenFun.transferEth(con, req.params.to, req.params.amount, req.params.address, req.params.prikey).then(ctx => {
+  //             res.send(ctx);
+  //         }).catch(err => {
+  //           res.send({
+  //             "status": false,
+  //             "err": err
+  //           });
+  //         });
+  //     });
+  // });
   app.get('/getbalance/:address', (req, res) => {
       console.log("-----get balance params----", req.params)
       setResHeadr(res);

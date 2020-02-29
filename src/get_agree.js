@@ -24,7 +24,7 @@ function signAgreement(db, contract, username, houseId, houseAddr, falsify, phon
 		dbFun.querySignInfo(db, houseId).then(result => {
 			console.log("quer resl", result, result)
 			if (result && result.status && result.data.length != 0) {
-				resolve({status:false, err:"已签订该房屋合同!"});
+				resolve({status:false, err:"该房源已签订完合同！"});
 			} else {
 				const reqFun = contract.methods.newAgreement(username, idCard, phoneNum, rental, signHowLong, houseId, houseAddr, falsify, houseDeadline, payOne, houseUse);
 			    const reqABI = reqFun.encodeABI();
@@ -87,7 +87,7 @@ function leaserSign(db, contract, contractHouse, leaserName, houseId, phoneNum, 
 			    	} 
 				}).catch(err => {
 					console.log("Sign fail!", err);
-					reject({status: false, err: "请检查是否已经登录、余额能否满足租金要求、是否已预订该房屋！"});
+					reject({status: false, err: "请检查是否登录！"});
 				});
 			}
 		});

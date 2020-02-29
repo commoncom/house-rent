@@ -33,6 +33,35 @@ async function initRemark() {
 // First, judge whether user register
 // If user already register, login directly
 // Or, the user must login firstly.
+// function commentHouse(contract, addr, priKey, houseId, landlord, refeAddr, ratingIndex, remark) {
+// 	return new Promise((resolve, reject) => {
+// 			const loginFun = contract.methods.commentHouse(houseId, landlord, refeAddr, ratingIndex, remark);
+// 	        const logABI = loginFun.encodeABI();
+// 	        packSendMsg(addr, privateKey, contractAddress, logABI).then(receipt => {        			        	
+// 	        	if (receipt) {
+// 	        		console.log("Comment house start");
+// 	        		const eventJsonInterface = contract._jsonInterface.find(
+// 						o => (o.name === 'LoginEvent') && o.type === 'event');
+// 					if (JSON.stringify(receipt.logs) != '[]') {
+// 						const log = receipt.logs.find(
+// 							l => l.topics.includes(eventJsonInterface.signature)
+// 						)
+// 						let decodeLog = Web3EthAbi.decodeLog(eventJsonInterface.inputs, log.data, log.topics.slice(1))
+// 		   				console.log("Comment house success");
+// 		   				resolve(decodeLog);
+// 					} else {
+// 						resolve(false);
+// 					}
+// 	        	}  else {
+// 					resolve(false);
+// 				}
+				
+// 			}).catch(err => {
+// 				console.log("Fail to comment house");
+// 				reject(err);
+// 			});
+//     });
+// }
 function commentHouse(contract, addr, priKey, houseId, landlord, refeAddr, ratingIndex, remark) {
 	return new Promise((resolve, reject) => {
 			const loginFun = contract.methods.commentHouse(houseId, landlord, refeAddr, ratingIndex, remark);
@@ -48,12 +77,12 @@ function commentHouse(contract, addr, priKey, houseId, landlord, refeAddr, ratin
 						)
 						let decodeLog = Web3EthAbi.decodeLog(eventJsonInterface.inputs, log.data, log.topics.slice(1))
 		   				console.log("Comment house success");
-		   				resolve(decodeLog);
+		   				resolve({status: true, data: decodeLog});
 					} else {
-						resolve(false);
+						resolve({status:false, err: "解析数据异常!"});
 					}
 	        	}  else {
-					resolve(false);
+					resolve({status:false, err: "交易收据异常！"});
 				}
 				
 			}).catch(err => {
