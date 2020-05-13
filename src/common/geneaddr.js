@@ -12,4 +12,4 @@ function batchGene(n) {
 		generateAddress()
 	}
 }
-batchGene(6) 
+batchGene(7) 

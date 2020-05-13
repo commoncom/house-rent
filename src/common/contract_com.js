@@ -15,9 +15,13 @@ async function run(filePath) {
       console.log('Read ABI Error', err);
    }    
 }
-// GetContract("../ethererscan/token_abi.json", "0xfed21ab2993faa0e0b2ab92752428d96370d4889", contract => {
+// GetContract("../ethererscan/token_abi.json", "0xfed21ab2993faa0e0b2ab92752428d96370d4889").then(contract => {
 // 	// console.log(contract)
-// })
+// 	let addr = "0x5ea7f9bcb2a3a021fb0070540f9e56e515af1da9";
+// 	contract.methods.balanceOf(addr).call().then(res => {
+// 		console.log(res)
+// 	});
+// });
 function GetContract(filePath, contractAddress) {
 	return new Promise((resolve, reject) => {
 		run(filePath).then(abi => {

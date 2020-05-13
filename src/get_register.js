@@ -186,6 +186,28 @@ function logout(contract, privateKey, addr, username, pwd) {
 		});
     });
 }
+function updateInfo(contract, privateKey, addr, username, pwd, newPwd, userId) {
+	return new Promise((resolve, reject) => {
+  	    contract.methods.isLogin(addr).call().then(res => {
+			if (res) {
+				console.log("Find the user", res);
+				const loginFun = contract.methods.updateUser(addr, username, pwd, newPwd, userId);
+		        const logABI = loginFun.encodeABI();
+		        packSendMsg(addr, privateKey, contractAddress, logABI).then(receipt => {        	
+		        	if (receipt) {
+		        		console.log("Update success");
+		        		resolve(receipt);
+		        	} 
+				}).catch(err => {
+					console.log("Already login out", err);
+					reject(err);
+				});
+			} else {
+				reject("this user doesn't sign in!");			
+			}
+		});
+    });
+}
 
 function isExitUserAddress(contract, addr) {
 	return new Promise(resolve => {
@@ -251,6 +273,52 @@ function packSendMsg(formAddr, privateKey, toAddr, createABI) {
 		});	 	
 }
 
+function getInfo(db, addr, userId) {
+	return new Promise((resolve, reject) => {
+    	console.log("get user info", addr, userId);
+    	addrManager.getUserInfo(db, addr, userId).then(res => {
+    		console.log("--getInfo--", res)
+    		resolve(res);
+    	}).catch(err => {
+    		reject(err);
+    	});
+   });
+}
+function reqApprove(db, addr, reqAddr) {
+	return new Promise((resolve, reject) => {
+    	console.log("request approve", addr, reqAddr);
+    	addrManager.insertApprove(db, addr, reqAddr).then(res => {
+    		console.log("--getInfo--", res)
+    		resolve(res);
+    	}).catch(err => {
+    		reject(err);
+    	});
+   });
+}
+function approve(conn, con, address, requestAddr, prikey) {
+	return new Promise((resolve, reject) => {
+  	    contract.methods.isLogin(addr).call().then(res => {
+			if (res) {
+				console.log("Find the user", res);  //approveVisit(address _addr, uint _howlong)
+				const loginFun = contract.methods.approveVisit(addr, 3*24*3600); // 3 day
+		        const logABI = loginFun.encodeABI();
+		        packSendMsg(addr, prikey, contractAddress, logABI).then(receipt => {        	
+		        	if (receipt) {
+		        		console.log("Update success");
+		        		resolve(receipt);
+		        		addrManager.updateApprove(conn, address, requestAddr)
+		        	} 
+				}).catch(err => {
+					console.log("Already login out", err);
+					reject(err);
+				});
+			} else {
+				reject("this user doesn't sign in!");			
+			}
+		});
+    });
+}
+
 module.exports = {
 	initReg,
 	isAlreayReg,
@@ -259,5 +327,9 @@ module.exports = {
 	login,
 	logout,
 	createUser,
-	getStatus
+	getStatus,
+	updateInfo,
+	getInfo,
+	reqApprove,
+	approve
 }

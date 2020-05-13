@@ -39,6 +39,50 @@ function initialize() {
   let conn = initParam.connDb();
   console.log("----Init database success---");
   // 
+  app.get('/getinfo/:address/:user_id', (req, res) => {
+      console.log("-----getinfo house params----", req.params)
+      setResHeadr(res);
+      RegisterFun.getInfo(conn, req.params.address, req.params.user_id).then(ctx => {
+          console.log(ctx)
+          res.send(ctx);
+      }).catch(err => {
+          res.send({status: false, err: err});
+      });
+  });
+  // request approve
+  app.get('/approveuser/:address/:request_addr', (req, res) => {
+      console.log("-----authenticate house params----", req.params)
+      setResHeadr(res);
+      contractReg.then(con => {
+         RegisterFun.reqApprove(conn, req.params.address, req.params.request_addr).then(ctx => {
+            res.send(ctx);
+         }).catch(err => {
+            res.send(err);
+         });
+      }).catch(err => {
+            res.send({
+              "status": false,
+              "err": err
+            });
+      });
+  });
+  // approve /agapprove/address/request_addr/prikey
+  app.get('/agapprove/:address/:request_addr/:prikey', (req, res) => {
+      console.log("-----authenticate house params----", req.params)
+      setResHeadr(res);
+      contractReg.then(con => {
+         RegisterFun.approve(conn, con, req.params.address, req.params.request_addr,req.params.prikey).then(ctx => {
+            res.send(ctx);
+         }).catch(err => {
+            res.send(err);
+         });
+      }).catch(err => {
+            res.send({
+              "status": false,
+              "err": err
+            });
+      });
+  });
   app.get('/bindaddr/:userid/:address', (req, res) => {
     console.log("-----bind userid and address params----", req.params)
     setResHeadr(res);
@@ -83,7 +127,7 @@ function initialize() {
   });
   // 注册
   app.get('/register/:address/:username/:userId/:pwd/:cardId', (req, res) => {
-    console.log("-----get adddress params----", req.params)
+    console.log("-----register params----", req.params)
     setResHeadr(res);
     contractReg.then(con => {
         console.log("reg contract");
@@ -124,11 +168,32 @@ function initialize() {
       });
     });
   });
+  // logout
   app.get('/logout/:address/:username/:pwd/:prikey', (req, res) => {
-    console.log("-----get adddress params----", req.params)
+    console.log("----logout params----", req.params)
     contractReg.then(con => {
       RegisterFun.logout(con, req.params.prikey, req.params.address,req.params.username, req.username.pwd).then(ctx => {
          res.send(ctx);
+      }).catch(err => {
+          console.log("Login callback", err);
+          res.send(err);
+      });
+    }).catch(err => {
+      res.send({
+        "status": false,
+        "err": err
+      });
+    });
+  });
+  app.get('/updateinfo/:address/:username/:pwd/:newpwd/:userid/:prikey', (req, res) => {
+    console.log("-----update user info param----", req.params)
+    contractReg.then(con => {
+      let params = req.params;
+      RegisterFun.updateInfo(con, params.prikey, params.address, params.username, params.pwd, params.newpwd, params.userid).then(ctx => {
+         res.send(ctx);
+      }).catch(err => {
+          console.log("Login callback", err);
+          res.send(err);
       });
     }).catch(err => {
       res.send({
@@ -551,22 +616,22 @@ function initialize() {
       });
   });
   // 获取对租户的评论
-  app.get('/getremark/:houseid', (req, res) => {
-      console.log("---------", req.params)
-      RemarkFun.getRemarkTenant(contractRemark, req.params.houseid).then(ctx => {
-       if (ctx) { // Already sign
-            res.send({
-              "status": ctx.status,
-              "remark": ctx
-            });
-          }
-     }).catch(err => {
-        res.send({
-          "status": false,
-          "err": err
-        });
-      });
-  });
+  // app.get('/getremark/:houseid', (req, res) => {
+  //     console.log("---------", req.params)
+  //     RemarkFun.getRemarkTenant(contractRemark, req.params.houseid).then(ctx => {
+  //      if (ctx) { // Already sign
+  //           res.send({
+  //             "status": ctx.status,
+  //             "remark": ctx
+  //           });
+  //         }
+  //    }).catch(err => {
+  //       res.send({
+  //         "status": false,
+  //         "err": err
+  //       });
+  //     });
+  // });
   console.log("Start listen the port");
   server.listen(configuration.ServerPort,configuration.ServerAddress);
   });

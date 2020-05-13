@@ -15,7 +15,8 @@ function connDb() {
 		  host: configuration.DBAddress,
 		  user: configuration.DBUser,
 		  password: configuration.DBPassword,
-		  database: configuration.DBName
+		  database: configuration.DBName,
+		  useConnectionPooling: true
 	});
 	return new Promise((resolve, reject) => {
 		pool.getConnection(function(err, conn) {
