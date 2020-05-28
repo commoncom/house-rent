@@ -11,7 +11,6 @@ async function initToken() {
   return contract;
 }
 
-
 function getBalance(contract, addr) {
   return new Promise((resolve, reject) => {
     console.log("enter into get balance")
@@ -47,15 +46,29 @@ function getAllBalance(contract, addr) {
       });
    });
 }
-
+// initToken().then(con => {
+//    let to = "0x41f893cb802cf8d6f3c815490126c12716f0d365";
+//    // let from = "0xaDCe9984d4d2E3936A0eB6F21a6105217a3E8766";
+//    let addr = "0xaDCe9984d4d2E3936A0eB6F21a6105217a3E8766";
+//    let spender = "0xaDCe9984d4d2E3936A0eB6F21a6105217a3E8766";
+//    let prk2="0x36923250a8bf14292202a7932da90a3222560e8ff3c0426fc6b6199f1ee29023";
+//    transferToken(con, addr, to, 5000, spender, prk2).then(res => {
+//       console.log(res.transactionHash);
+//    });
+//    // transferApprove(con, spender, 2000, addr, prk2).then(res => {
+//    //     console.log(receipt.transactionHash);
+//    // });
+// });
 /**
 * des: initAddr: 若是普通转账则与from相同；若是授权后的转账，则与from不同 
 */
 //  // from: 转出账户， to: 转入账户， spender: 手续费支付方
 function transferToken(contract, from, to, amount, spender, privateKey) {
   return new Promise((resolve, reject) => {
-      amount = amount * 100000000;
-      const transFun = contract.methods.transferFrom(from, to, amount);
+      // amount = amount * 100000000;
+      let transfer_amount = amount + '00000000';
+      console.log("start token transfer");
+      const transFun = contract.methods.transferFrom(from, to, transfer_amount);
       const transABI = transFun.encodeABI();
       packSendMsg(spender, privateKey, contractAddress, transABI).then(receipt => {
           if (receipt) {
@@ -65,12 +78,12 @@ function transferToken(contract, from, to, amount, spender, privateKey) {
                   console.log("Transfer receive: ", ctx)
                   resolve({status:flag, data: ctx.transactionHash});
                 } else {
-                  resolve({status:false, err:"转账失败!"});
+                  resolve({status:false, err:JSON.stringify("转账失败!")});
                 }
           } 
       }).catch(err => {
           console.log("transfer token error!", err);
-          reject({status: false, err: err});
+          reject({status: false, err: JSON.stringify(err)});
       });     
   });
 }
@@ -78,7 +91,9 @@ function transferToken(contract, from, to, amount, spender, privateKey) {
 function transferEth(contract, to, amount, from, privateKey) {
   return new Promise((resolve, reject) => {
       let gas, nonce;
-      gas = 20000000000;
+      gas = 30000000000;
+      console.time("trans eth")
+      console.log("start transfer eth");
       web3.eth.getTransactionCount(from, 'pending').then(_nonce => {
           if (nonceMap.has(from) && (nonceMap[from] == _nonce)) {
              _nonce += 1
@@ -94,20 +109,39 @@ function transferEth(contract, to, amount, from, privateKey) {
               value: web3.utils.toWei(amount+'', 'ether'),
               nonce: '0x' + nonce
           }
+          console.log("signTransaction eth", txParams);
           web3.eth.accounts.signTransaction(txParams, privateKey).then(signedTx => {
+              console.log("sendSignedTransaction eth");
               web3.eth.sendSignedTransaction(signedTx.rawTransaction).then(receipt => {
+                console.log("transfer result: ", receipt);
                 if (receipt.status) {
-                  console.log("transfer success!");
-                  resolve({status: true, data: receipt});
+                  console.log("transfer success!", receipt);
+                  resolve({status: true, data: receipt.transactionHash});
                 } else {
-                  resolve({status: false, err: "未获取正确的返回!"});
+                  resolve({status: false, err: JSON.stringify("未获取正确的返回!")});
                 }
+                console.timeEnd("trans eth")
               }).catch(err => {
-                console.log("Send Error", err);
-                reject({status: false, err: err});
+                console.log("send",console.log(typeof(err)), console.table(err))
+                console.log("Send Error", JSON.stringify(err)=='{}', 111, err);
+                if (JSON.stringify(err) == '{}') {
+                    resolve({status: false, err: JSON.stringify("余额不足，发送失败!")});
+                } else {
+                   resolve({status: false, err: JSON.stringify(err)});
+                }
               });
+          }).catch(err => {
+                console.log("signTransaction Error", err);
+                reject({status: false, err: JSON.stringify(err)});
           });  
-      });      
+      }).catch(err => {
+            console.log("getTransactionCount Error", err);
+            if (JSON.stringify(err) == '{}') {
+              resolve({status: false, err: JSON.stringify("网络异常!")});
+            } else {
+               resolve({status: false, err: JSON.stringify(err)});
+            }
+      });       
   });
 }
 // Call one for every contract
@@ -147,7 +181,7 @@ function decodeLog(contract, receipt, eventName) {
 function packSendMsg(formAddr, privateKey, toAddr, createABI) {
     let gas, nonce;
     return new Promise((resolve, reject) => {
-      gas = 20000000000;
+      gas = 30000000000;
       web3.eth.getTransactionCount(formAddr, 'pending').then(_nonce => {
         if (nonceMap.has(_nonce)) {
           _nonce += 1

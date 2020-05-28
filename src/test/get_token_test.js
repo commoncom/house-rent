@@ -1,4 +1,4 @@
-let TokenFun = require("./get_token.js");
+let TokenFun = require("../get_token.js");
 // let RegisterFun = require("./get_register.js");
 let web3 = require("./common/contract_com.js").web3;
 TokenFun.initToken().then(con => {

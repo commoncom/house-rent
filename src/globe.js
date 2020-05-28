@@ -109,11 +109,13 @@ function initialize() {
   app.get('/getstatus/:address', (req, res) => {
     console.log("-----get userid and address params----", req.params)
     setResHeadr(res);
+    console.time("status")
     contractReg.then(con => {
       console.log("reg contract");
         RegisterFun.getStatus(conn, con, req.params.address).then(ctx => {
           // console.log(ctx)
           res.send(ctx);
+          console.timeEnd("status");
         }).catch(err => {
           console.log("get status error:", err)
           res.send(err);
@@ -129,14 +131,19 @@ function initialize() {
   app.get('/register/:address/:username/:userId/:pwd/:cardId', (req, res) => {
     console.log("-----register params----", req.params)
     setResHeadr(res);
+    console.time("register");
+    console.time("register1");
+    console.time("register2");
     contractReg.then(con => {
         console.log("reg contract");
           RegisterFun.createUser(conn, con, req.params.address,req.params.username, req.params.userId, req.params.pwd, req.params.cardId).then(ctx => {
             console.log(ctx)
             res.send(ctx);
+            console.timeEnd("register1")
           }).catch(err => {
             console.log("register error:", err)
             res.send(err);
+            console.timeEnd("register2")
           });       
       }).catch(err => {
         res.send({
@@ -144,22 +151,26 @@ function initialize() {
           "err": err
         });
       });
+      console.timeEnd("register")
   });
   // 登录
   app.get('/login/:address/:username/:pwd/:prikey', (req, res) => {
     console.log("-----login params----", req.params)
     setResHeadr(res);
+    console.time("log");
+    console.time("log1");
+    console.time("log2");
     contractReg.then(con => {
-      console.time("login");
       console.log("start login contract");
       RegisterFun.login(conn, con, req.params.prikey, req.params.address,
           req.params.username, req.params.pwd).then(ctx => {
         res.send(ctx);
+        console.timeEnd("log1")
       }).catch(err => {
           console.log("Login callback", err);
           res.send(err);
-      });
-      console.timeEnd("login")
+          console.timeEnd("log2")
+      });      
     }).catch(err => {
       // console.log("login err", err);
       res.send({
@@ -167,6 +178,7 @@ function initialize() {
         "err": err
       });
     });
+    console.timeEnd("log")
   });
   // logout
   app.get('/logout/:address/:username/:pwd/:prikey', (req, res) => {
@@ -206,30 +218,40 @@ function initialize() {
   app.get('/transfertoken/:from/:to/:amount/:address/:prikey', (req, res) => {
       console.log("-----get transfer token params----", req.params)
       setResHeadr(res);
+      console.time("trans");
       contractToken.then(con => { 
           TokenFun.transferToken(con, req.params.from, req.params.to, req.params.amount, req.params.address, req.params.prikey).then(ctx => {
               res.send(ctx);
+              console.timeEnd("trans");
           }).catch(err => {
-            res.send({
-              "status": false,
-              "err": err
-            });
+            res.send(err);
           });
+      }).catch(err => {
+        res.send({
+          "status": false,
+          "err": err
+        });
       });  
   });
   //Eth transfer
   app.get('/transfereth/:to/:amount/:address/:prikey', (req, res) => {
       console.log("-----get transfer eth params----", req.params)
       setResHeadr(res);
+      console.time("trans")
       contractToken.then(con => { 
           TokenFun.transferEth(con, req.params.to, req.params.amount, req.params.address, req.params.prikey).then(ctx => {
               res.send(ctx);
+              console.timeEnd("trans")
           }).catch(err => {
-            res.send({
-              "status": false,
-              "err": err
-            });
+            console.log("callback", err)
+            res.send(err);
+            // console.timeEnd("trans")
           });
+      }).catch(err => {
+        res.send({
+          "status": false,
+          "err": err
+        });
       });
   });
   app.get('/approvetransfer/:to/:amount/:address/:prikey', (req, res) => {
@@ -295,9 +317,11 @@ function initialize() {
   app.get('/getAuthInfo/:houseid/:leaser_addr', (req, res) => {
       console.log("-----authenticate house params----", req.params)
       setResHeadr(res);
+      console.time("get_auth")
       contractAuth.then(con => {
          AuthFun.getHouseOwer(con, req.params.houseid, req.params.leaser_addr).then(ctx => {
             res.send(ctx);
+            console.timeEnd("get_auth");
          }).catch(err => {
             res.send(err);
          });
@@ -324,8 +348,10 @@ function initialize() {
   app.get('/getauth/:houseid', (req, res) => {
       console.log("-----release house params----", req.params)
       setResHeadr(res);
+      console.time("queryApprove")
       authManager.queryApprove(conn, req.params.houseid).then(ctx => {
           console.log(ctx)
+          console.timeEnd("queryApprove");
           res.send(ctx);
       }).catch(err => {
           console.log("get address error", err)
@@ -366,14 +392,14 @@ function initialize() {
       console.log("-----request sign house params----", req.params)
       setResHeadr(res);
       contractHouse.then(con => {
-          HouseFun.requestSign(conn, con, req.params.address, req.params.prikey, req.params.houseid, req.params.realrent).then(ctx => {
+          HouseFun.requestSign(conn, con, req.params.address, req.params.prikey, req.params.houseid, req.params.realrent, 3000).then(ctx => {
             res.send(ctx);
           }).catch(err => {
-            res.send({
-              "status": 201,
-              "err": err
-            });
+            res.send(err);
           });
+      }).catch(err => {
+          console.log("get address error", err)
+          res.send({status: 201, err: err});
       });
   });
   // 签订合同
@@ -509,9 +535,11 @@ function initialize() {
   app.get('/getbalance/:address', (req, res) => {
       console.log("-----get balance params----", req.params)
       setResHeadr(res);
+      console.time("bal")
       contractToken.then(con => { 
           TokenFun.getAllBalance(con, req.params.address).then(ctx => {
               res.send(ctx);
+              console.timeEnd("bal");
           }).catch(err => {
             res.send({
               "status": false,
@@ -542,8 +570,10 @@ function initialize() {
   app.get('/getcomment/:houseid', (req, res) => {
       console.log("-----comment house params----", req.params)
       setResHeadr(res);
+      console.time("getcomment");
       commentManager.getComment(conn, req.params.houseid).then(ctx => {
           res.send(ctx);
+          console.timeEnd("getcomment");
       }).catch(err => {
           console.log("get comment error", err)
           res.send({status: false, err: err});

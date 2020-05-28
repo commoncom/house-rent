@@ -57,18 +57,18 @@ function createUser(db, contract, addr, username, userId, pwd, cardId) {
                     	resolve({status:flag, data:ctx.transactionHash});
                     	addrManager.updateUserStatus(db, "", addr, 1);
                     } else {
-                    	resolve({status:false, err:"注册失败!"});
+                    	resolve({status:false, err:JSON.stringify("注册失败!")});
                     }             
                 }).catch(err1 => {
                   console.log("Create user error", err1);
-                  reject({status:false, err:err1});
+                  reject({status:false, err:JSON.stringify(err1)});
                 });
             } else {
-              resolve({status:false, err:"该用户已注册！"});
+              resolve({status:false, err:JSON.stringify("该用户已注册！")});
            };
     	}).catch(err1 => {
            console.log("Create user error", err1);
-           reject({status:false, err:"网络繁忙，请稍后重试!"});
+           reject({status:false, err:JSON.stringify("网络繁忙，请稍后重试!")});
         });
    });
 }
@@ -103,13 +103,13 @@ function login(db, contract, privateKey, addr, username, pwd) {
             if (flag) {
             	resolve({status:flag, data: ctx.transactionHash});
             } else {
-            	resolve({status:false, err:"登录失败!"});
+            	resolve({status:false, err:"登录失败"});
             } 
             addrManager.updateUserStatus(db, "", addr, 2);
         	console.log("login after resolve"); 
 		}).catch(err => {
 			console.log("Login fail！", err);
-			reject({status:false, err: "请检查余额是否不足,是否已注册，是否已登录,地址是否正确!"});
+			reject({status:false, err: "请检查余额是否不足,是否已注册，是否已登录,地址是否正确, 录失败!"});
 		});
 		console.timeEnd("packSendMsg")
     });
@@ -227,7 +227,7 @@ function isExitUserAddress(contract, addr) {
 function packSendMsg(formAddr, privateKey, toAddr, createABI) {
 		let gas, nonce;
 		return new Promise((resolve, reject) => {
-			gas = 20000000000;
+			gas = 30000000000;
 			web3.eth.getTransactionCount(formAddr, 'pending').then(_nonce => {
 				if (nonceMap.has(_nonce)) {
 					_nonce += 1

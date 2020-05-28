@@ -100,7 +100,7 @@ function releaseHouse(db, contract, contractToken, addr, privateKey, houseAddr, 
   });
 }
 
-function requestSign(db, contract, addr, privateKey, houseId, realRent) {
+function requestSign(db, contract, addr, privateKey, houseId, realRent, deposit) { 
   return new Promise((resolve, reject) => {
     // Judge whether the user has logged in
     checkLogin(addr).then(flag => {
@@ -120,7 +120,7 @@ function requestSign(db, contract, addr, privateKey, houseId, realRent) {
             }
           } else {
             console.log("=request sign=", houseId, realRent);
-            const reqFun = contract.methods.requestSign(houseId, realRent);
+            const reqFun = contract.methods.requestSign(houseId, realRent, deposit);
               const reqABI = reqFun.encodeABI();
               console.log("Start request!", addr);
               packSendMsg(addr, privateKey, contractAddress, reqABI).then(receipt => {
