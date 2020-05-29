@@ -65,67 +65,6 @@
 		"type": "function"
 	},
 	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "_owner",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"name": "_owername",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"name": "_houseId",
-				"type": "bytes32"
-			}
-		],
-		"name": "AuthHouse",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "sender",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"name": "_addr",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"name": "_houseId",
-				"type": "bytes32"
-			}
-		],
-		"name": "ApproveVist",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"name": "_addr",
-				"type": "address"
-			}
-		],
-		"name": "ApproveUpdate",
-		"type": "event"
-	},
-	{
 		"constant": false,
 		"inputs": [
 			{
@@ -169,6 +108,10 @@
 			{
 				"name": "",
 				"type": "string"
+			},
+			{
+				"name": "",
+				"type": "bytes32"
 			}
 		],
 		"payable": false,
@@ -234,12 +177,6 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
 		"constant": false,
 		"inputs": [
 			{
@@ -265,6 +202,73 @@
 		"payable": false,
 		"stateMutability": "nonpayable",
 		"type": "function"
+	},
+	{
+		"inputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "_owner",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "_owername",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"name": "_houseId",
+				"type": "bytes32"
+			}
+		],
+		"name": "AuthHouse",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "_addr",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "_houseId",
+				"type": "bytes32"
+			}
+		],
+		"name": "ApproveVist",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "_addr",
+				"type": "address"
+			}
+		],
+		"name": "ApproveUpdate",
+		"type": "event"
 	},
 	{
 		"anonymous": false,

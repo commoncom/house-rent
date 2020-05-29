@@ -89,6 +89,7 @@ function approveVisit(db, contract, houseId, addr, approveAddr, arpprovePrikey) 
 	return new Promise((resolve, reject) => {
 		const loginFun = contract.methods.approveVisit(addr);
         const logABI = loginFun.encodeABI();
+        console.log("start approve")
         packSendMsg(approveAddr, arpprovePrikey, contractAddress, logABI).then(receipt => {  
             console.log("Approve Vist callback: " ,receipt) 
 			let [flag, ctx, sendMsg] = decodeLog(contract, receipt, 'ApproveVist');

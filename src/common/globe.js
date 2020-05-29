@@ -5,11 +5,18 @@ const regAddr = "0x5AcA28f9da9960145e81c11293F94ad115ca3218";
 const regpri = "0x8C6817D77CFD962F6EAB191251B9720D3EB76221AE5A28379C9B3D03EC68EA8A";
 
 // contract address
+// const tokenConAddr = "0xfed21ab2993faa0e0b2ab92752428d96370d4889";
+// const regConAddr = "0x51f807fb009c77b3ca57d363ba581444afa619e5";
+// const remarkConAddr = "0xb7fdf357abf21d7d6aa0e956c2a4ba38651025f9";
+// const authConAddr= "0x063dc23b5332063ab5f88c23d3fb8545eb01c576";
+// const houseConAddr = "0x8a84a496682adbe32131b4d49ce3a17cbbfe22b6";
+// const agreeConAddr = "0x09cd6647c7a97dc1a9e8afc0bf0a8309ebec91e9";
+// new 
 const tokenConAddr = "0xfed21ab2993faa0e0b2ab92752428d96370d4889";
 const regConAddr = "0x51f807fb009c77b3ca57d363ba581444afa619e5";
 const remarkConAddr = "0xb7fdf357abf21d7d6aa0e956c2a4ba38651025f9";
-const authConAddr= "0x063dc23b5332063ab5f88c23d3fb8545eb01c576";
-const houseConAddr = "0x8a84a496682adbe32131b4d49ce3a17cbbfe22b6";
+const authConAddr= "0x72ef1958a9c6d530616f69321a1541354cdef7fc";
+const houseConAddr = "0xb4c3bcce63a4016113f07052569fc2877f29b309";
 const agreeConAddr = "0x09cd6647c7a97dc1a9e8afc0bf0a8309ebec91e9";
 
 const promiseAmount = 50;
